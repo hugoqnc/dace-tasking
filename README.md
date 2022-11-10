@@ -1,3 +1,13 @@
+## Installing for Development
+If you have previously installed DaCe, remove it with `pip uninstall dace`. Also remove your local dace folder if you have previously cloned it.
+
+Then, run the following in the folder of your choice:
+```bash
+git clone --recursive https://github.com/hugoqnc/dace-tasking.git
+cd dace-tasking
+pip install --editable .
+```
+---
 [![General Tests](https://github.com/spcl/dace/actions/workflows/general-ci.yml/badge.svg)](https://github.com/spcl/dace/actions/workflows/general-ci.yml)
 [![GPU Tests](https://github.com/spcl/dace/actions/workflows/gpu-ci.yml/badge.svg)](https://github.com/spcl/dace/actions/workflows/gpu-ci.yml)
 [![FPGA Tests](https://github.com/spcl/dace/actions/workflows/fpga-ci.yml/badge.svg)](https://github.com/spcl/dace/actions/workflows/fpga-ci.yml)
