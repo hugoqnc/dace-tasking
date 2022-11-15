@@ -49,6 +49,7 @@ class StorageType(aenum.AutoNumberEnum):
 class OMPScheduleType(aenum.AutoNumberEnum):
     """ Available OpenMP shedule types for Maps with CPU-Multicore schedule. """
     Default = ()  #: OpenMP library default
+    Tasking = () #: OpenMP tasking schedule
     Static = ()  #: Static schedule
     Dynamic = ()  #: Dynamic schedule
     Guided = ()  #: Guided schedule

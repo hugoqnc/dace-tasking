@@ -1708,8 +1708,12 @@ class CPUCodeGen(TargetCodeGenerator):
         # TODO: Refactor to generate_scope_preamble once a general code
         #  generator (that CPU inherits from) is implemented
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-            map_header += "#pragma omp parallel"
-            if node.map.omp_schedule != dtypes.OMPScheduleType.Default:
+            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+                map_header += "#pragma omp parallel"
+                map_header += "\n{\n"
+            else:
+                map_header += "#pragma omp parallel for"
+            if node.map.omp_schedule not in (dtypes.OMPScheduleType.Default, dtypes.OMPScheduleType.Tasking):
                 schedule = " schedule("
                 if node.map.omp_schedule == dtypes.OMPScheduleType.Static:
                     schedule += "static"
@@ -1742,7 +1746,9 @@ class CPUCodeGen(TargetCodeGenerator):
             #            reduced_variables.append(outedge)
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
-            map_header += "#pragma omp single\n"
+            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+                map_header += "#pragma omp single"
+                map_header += "\n{\n"
 
         # TODO: Explicit map unroller
         if node.map.unroll:
@@ -1768,8 +1774,9 @@ class CPUCodeGen(TargetCodeGenerator):
                 state_id,
                 node,
             )
-            result.write("#pragma omp task\n", sdfg, state_id, node)
-            result.write("{\n", sdfg, state_id, node)
+            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+                result.write("#pragma omp task\n", sdfg, state_id, node)
+                result.write("{\n", sdfg, state_id, node)
 
         callsite_stream.write(inner_stream.getvalue())
 
@@ -1778,7 +1785,9 @@ class CPUCodeGen(TargetCodeGenerator):
 
     def _generate_MapExit(self, sdfg, dfg, state_id, node, function_stream, callsite_stream):
         result = callsite_stream
-        result.write("}", sdfg, state_id, node)
+
+        if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+            result.write("}\n}\n}", sdfg, state_id, node)
 
         # Obtain start of map
         scope_dict = dfg.scope_dict()
