@@ -20,7 +20,7 @@ nnz = dace.symbol('nnz')
 
 # Define dace program with type hints to enable Ahead-Of-Time compilation
 @dace.program
-def spmv(A_row: dace.uint32[H + 1], A_col: dace.uint32[nnz], A_val: dace.float32[nnz], x: dace.float32[W]):
+def spmv_tasking(A_row: dace.uint32[H + 1], A_col: dace.uint32[nnz], A_val: dace.float32[nnz], x: dace.float32[W]):
     b = np.zeros([H], dtype=np.float32)
 
     for i in dace.map[0:H]:
@@ -68,9 +68,9 @@ if __name__ == "__main__":
     #########################
 
     # Run program
-    # b = spmv(A_row, A_col, A_val, x)
+    # b = spmv_tasking(A_row, A_col, A_val, x)
 
-    g = spmv.to_sdfg(simplify=True)
+    g = spmv_tasking.to_sdfg(simplify=True)
     for node, _ in g.all_nodes_recursive():
         if isinstance(node, nodes.EntryNode) or isinstance(node, nodes.ExitNode):
             node.map.omp_schedule = OMPScheduleType.Tasking
