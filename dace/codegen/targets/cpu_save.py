@@ -1713,7 +1713,7 @@ class CPUCodeGen(TargetCodeGenerator):
         # TODO: Refactor to generate_scope_preamble once a general code
         #  generator (that CPU inherits from) is implemented
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-            map_header += "#pragma omp parallel"
+            map_header += "#pragma omp parallel for"
             if node.map.omp_schedule != dtypes.OMPScheduleType.Default:
                 schedule = " schedule("
                 if node.map.omp_schedule == dtypes.OMPScheduleType.Static:
@@ -1745,9 +1745,8 @@ class CPUCodeGen(TargetCodeGenerator):
             #                typ=_REDUCTION_TYPE_TO_OPENMP[redt],
             #                var=outedge.src_conn))
             #            reduced_variables.append(outedge)
+
             map_header += " %s\n" % ", ".join(reduction_stmts)
-            # omp parallel open
-            map_header += "{\n"
 
         # TODO: Explicit map unroller
         if node.map.unroll:
@@ -1758,9 +1757,6 @@ class CPUCodeGen(TargetCodeGenerator):
 
         # Nested loops
         result.write(map_header, sdfg, state_id, node)
-        # omp single open
-        if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-            result.write("#pragma omp single nowait\n{\n", sdfg, state_id, node)
         for i, r in enumerate(node.map.range):
             # var = '__DACEMAP_%s_%d' % (node.map.label, i)
             var = map_params[i]
@@ -1769,7 +1765,6 @@ class CPUCodeGen(TargetCodeGenerator):
             if node.map.unroll:
                 result.write("#pragma unroll", sdfg, state_id, node)
 
-            # for loop open
             result.write(
                 "for (auto %s = %s; %s < %s; %s += %s) {\n" %
                 (var, cpp.sym2cpp(begin), var, cpp.sym2cpp(end + 1), var, cpp.sym2cpp(skip)),
@@ -1777,9 +1772,6 @@ class CPUCodeGen(TargetCodeGenerator):
                 state_id,
                 node,
             )
-            # omp task open
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-                result.write("#pragma omp task\n{\n", sdfg, state_id, node)
 
         callsite_stream.write(inner_stream.getvalue())
 
@@ -1811,21 +1803,9 @@ class CPUCodeGen(TargetCodeGenerator):
 
         # JZ}
         for _ in map_node.map.range:
-            # for loop close
-            result.write("}\n", sdfg, state_id, node)
-            # omp task close
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-                result.write("}\n", sdfg, state_id, node)
-
-        result.write(outer_stream.getvalue())
-
-        if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-            # omp single close
-            result.write("}\n", sdfg, state_id, node)
-            result.write("#pragma omp taskwait\n", sdfg, state_id, node)
-            # omp parallel close
             result.write("}", sdfg, state_id, node)
 
+        result.write(outer_stream.getvalue())
 
         # JZ}
         callsite_stream.write('}', sdfg, state_id, node)

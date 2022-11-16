@@ -1,3 +1,21 @@
+# Documentation
+## Modified code
+codegen/targets/cpu.py: `omp task`\
+codegen/targets/cpu_save.py: `omp parallel for`\
+for opening/closing brackets, look for `# JZ{`/`# JZ}`
+
+## Code structure
+Main part of the code that we need to work on: `class CPUCodeGen` in targets/cpu.py\
+codegen/codegen.py imports targets/cpu.py and uses `default_target = cpu.CPUCodeGen`\
+To revert to using `omp parallel for`, change the file name in codegen/targets
+
+## Usage
+eg. python samples/simple/axpy.py
+
+# Problems
+laplace is extremely slow
+
+# Notes
 ## Installing for Development
 If you have previously installed DaCe, remove it with `pip uninstall dace`. Also remove your local dace folder if you have previously cloned it.
 
