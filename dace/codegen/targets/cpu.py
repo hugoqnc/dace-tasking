@@ -1787,7 +1787,7 @@ class CPUCodeGen(TargetCodeGenerator):
         result = callsite_stream
 
         if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
-            result.write("}\n}\n}\n", sdfg, state_id, node)
+            result.write("}\n}\n", sdfg, state_id, node)
             result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
         # Obtain start of map
@@ -1811,7 +1811,9 @@ class CPUCodeGen(TargetCodeGenerator):
         self.generate_scope_postamble(sdfg, dfg, state_id, function_stream, outer_stream, callsite_stream)
 
         for _ in map_node.map.range:
-            result.write("}", sdfg, state_id, node)
+            result.write("}\n", sdfg, state_id, node)
+            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+                result.write("}", sdfg, state_id, node)
 
         result.write(outer_stream.getvalue())
 
