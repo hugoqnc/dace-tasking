@@ -1747,7 +1747,7 @@ class CPUCodeGen(TargetCodeGenerator):
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
             if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
-                map_header += "#pragma omp single"
+                map_header += "#pragma omp single nowait"
                 map_header += "\n{\n"
 
         # TODO: Explicit map unroller
@@ -1787,7 +1787,8 @@ class CPUCodeGen(TargetCodeGenerator):
         result = callsite_stream
 
         if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
-            result.write("}\n}\n}", sdfg, state_id, node)
+            result.write("}\n}\n}\n", sdfg, state_id, node)
+            result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
         # Obtain start of map
         scope_dict = dfg.scope_dict()
