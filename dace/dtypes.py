@@ -63,6 +63,7 @@ class ScheduleType(aenum.AutoNumberEnum):
     MPI = ()  #: MPI processes
     CPU_Multicore = ()  #: OpenMP
     CPU_Multicore_Tasking = () # OpenMP Tasking backend
+    CPU_Multicore_Tasking_Default = ()
     Unrolled = ()  #: Unrolled code
     SVE_Map = ()  #: Arm SVE
 
@@ -186,6 +187,8 @@ SCOPEDEFAULT_STORAGE = {
     ScheduleType.Sequential: StorageType.Register,
     ScheduleType.MPI: StorageType.CPU_Heap,
     ScheduleType.CPU_Multicore: StorageType.Register,
+    ScheduleType.CPU_Multicore_Tasking: StorageType.Register,
+    ScheduleType.CPU_Multicore_Tasking_Default: StorageType.CPU_Heap,
     ScheduleType.GPU_Default: StorageType.GPU_Global,
     ScheduleType.GPU_Persistent: StorageType.GPU_Global,
     ScheduleType.GPU_Device: StorageType.GPU_Shared,
@@ -203,7 +206,8 @@ SCOPEDEFAULT_SCHEDULE = {
     ScheduleType.Sequential: ScheduleType.Sequential,
     ScheduleType.MPI: ScheduleType.CPU_Multicore,
     ScheduleType.CPU_Multicore: ScheduleType.Sequential,
-    ScheduleType.CPU_Multicore_Tasking: ScheduleType.CPU_Multicore,
+    ScheduleType.CPU_Multicore_Tasking: ScheduleType.Sequential,
+    ScheduleType.CPU_Multicore_Tasking_Default: ScheduleType.CPU_Multicore_Tasking,
     ScheduleType.Unrolled: ScheduleType.CPU_Multicore,
     ScheduleType.GPU_Default: ScheduleType.GPU_Device,
     ScheduleType.GPU_Persistent: ScheduleType.GPU_Device,

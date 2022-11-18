@@ -4,8 +4,8 @@
 import argparse
 import dace
 import numpy as np
-from dace.sdfg import nodes
-from dace.dtypes import OMPScheduleType
+from dace.sdfg import infer_types
+from dace.dtypes import ScheduleType
 try:
     import scipy.sparse as sp
 except (ImportError, ModuleNotFoundError):
@@ -71,9 +71,7 @@ if __name__ == "__main__":
     # b = spmv_tasking(A_row, A_col, A_val, x)
 
     g = spmv_tasking.to_sdfg(simplify=True)
-    for node, _ in g.all_nodes_recursive():
-        if isinstance(node, nodes.EntryNode) or isinstance(node, nodes.ExitNode):
-            node.map.omp_schedule = OMPScheduleType.Tasking
+    infer_types.set_default_schedule_and_storage_types(g, ScheduleType.CPU_Multicore_Tasking_Default)
     b = g(A_row=A_row, A_col=A_col, A_val=A_val, x=x, W=x.shape[0], H=(A_row.shape[0]-1), nnz=A_col.shape[0])
 
 
