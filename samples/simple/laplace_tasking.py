@@ -4,8 +4,8 @@
 import argparse
 import dace
 import numpy as np
-from dace.sdfg import nodes
-from dace.dtypes import OMPScheduleType
+from dace.sdfg import infer_types
+from dace.dtypes import ScheduleType
 
 # Define a symbol so that the vectors could have arbitrary sizes and compile the code once
 # (this step is not necessary for arrays with known sizes)
@@ -40,9 +40,7 @@ if __name__ == "__main__":
 
     # Specify to use Tasking
     g = dace_laplace.to_sdfg(simplify=True)
-    for node, _ in g.all_nodes_recursive():
-        if isinstance(node, nodes.EntryNode) or isinstance(node, nodes.ExitNode):
-            node.map.omp_schedule = OMPScheduleType.Tasking
+    infer_types.set_default_schedule_and_storage_types(g, ScheduleType.CPU_Multicore_Tasking_Default)
 
     # Set initial values
     A = np.random.rand(args.N)
