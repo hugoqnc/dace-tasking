@@ -5,7 +5,7 @@ import argparse
 import dace
 import numpy as np
 from dace.sdfg import nodes
-from dace.dtypes import OMPScheduleType
+from dace.dtypes import ScheduleType
 # Define a symbol so that the vectors could have arbitrary sizes and compile the code once
 # (this step is not necessary for arrays with known sizes)
 N = dace.symbol('N')
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     g = axpy_tasking.to_sdfg(simplify=True)
     for node, _ in g.all_nodes_recursive():
         if isinstance(node, nodes.EntryNode) or isinstance(node, nodes.ExitNode):
-            node.map.omp_schedule = OMPScheduleType.Tasking
+            node.map.schedule = ScheduleType.CPU_Multicore_Tasking
 
     # Call the program (the value of N is inferred by dace automatically)
     z = g(a=a, x=x, y=y, N=x.shape[0])

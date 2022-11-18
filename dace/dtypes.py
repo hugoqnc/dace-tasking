@@ -49,7 +49,6 @@ class StorageType(aenum.AutoNumberEnum):
 class OMPScheduleType(aenum.AutoNumberEnum):
     """ Available OpenMP shedule types for Maps with CPU-Multicore schedule. """
     Default = ()  #: OpenMP library default
-    Tasking = () #: OpenMP tasking schedule
     Static = ()  #: Static schedule
     Dynamic = ()  #: Dynamic schedule
     Guided = ()  #: Guided schedule
@@ -63,6 +62,7 @@ class ScheduleType(aenum.AutoNumberEnum):
     Sequential = ()  #: Sequential code (single-thread)
     MPI = ()  #: MPI processes
     CPU_Multicore = ()  #: OpenMP
+    CPU_Multicore_Tasking = () # OpenMP Tasking backend
     Unrolled = ()  #: Unrolled code
     SVE_Map = ()  #: Arm SVE
 
@@ -203,6 +203,7 @@ SCOPEDEFAULT_SCHEDULE = {
     ScheduleType.Sequential: ScheduleType.Sequential,
     ScheduleType.MPI: ScheduleType.CPU_Multicore,
     ScheduleType.CPU_Multicore: ScheduleType.Sequential,
+    ScheduleType.CPU_Multicore_Tasking: ScheduleType.CPU_Multicore,
     ScheduleType.Unrolled: ScheduleType.CPU_Multicore,
     ScheduleType.GPU_Default: ScheduleType.GPU_Device,
     ScheduleType.GPU_Persistent: ScheduleType.GPU_Device,

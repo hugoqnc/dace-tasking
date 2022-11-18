@@ -79,7 +79,7 @@ class CPUCodeGen(TargetCodeGenerator):
 
         # Register dispatchers
         dispatcher.register_node_dispatcher(self)
-        dispatcher.register_map_dispatcher([dtypes.ScheduleType.CPU_Multicore, dtypes.ScheduleType.Sequential], self)
+        dispatcher.register_map_dispatcher([dtypes.ScheduleType.CPU_Multicore, dtypes.ScheduleType.CPU_Multicore_Tasking, dtypes.ScheduleType.Sequential], self)
 
         cpu_storage = [dtypes.StorageType.CPU_Heap, dtypes.StorageType.CPU_ThreadLocal, dtypes.StorageType.Register]
         dispatcher.register_array_dispatcher(cpu_storage, self)
@@ -1708,12 +1708,8 @@ class CPUCodeGen(TargetCodeGenerator):
         # TODO: Refactor to generate_scope_preamble once a general code
         #  generator (that CPU inherits from) is implemented
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
-            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
-                map_header += "#pragma omp parallel"
-                map_header += "\n{\n"
-            else:
-                map_header += "#pragma omp parallel for"
-            if node.map.omp_schedule not in (dtypes.OMPScheduleType.Default, dtypes.OMPScheduleType.Tasking):
+            map_header += "#pragma omp parallel for"
+            if node.map.omp_schedule != dtypes.OMPScheduleType.Default:
                 schedule = " schedule("
                 if node.map.omp_schedule == dtypes.OMPScheduleType.Static:
                     schedule += "static"
@@ -1746,13 +1742,15 @@ class CPUCodeGen(TargetCodeGenerator):
             #            reduced_variables.append(outedge)
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
-            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
-                map_header += "#pragma omp single nowait"
-                map_header += "\n{\n"
+        elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+            map_header += "#pragma omp parallel\n"
+            map_header += "{\n"
+            map_header += "#pragma omp single nowait\n"
+            map_header += "{\n"
 
         # TODO: Explicit map unroller
         if node.map.unroll:
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore:
+            if node.map.schedule in (dtypes.ScheduleType.CPU_Multicore, dtypes.ScheduleType.CPU_Multicore_Tasking):
                 raise ValueError("A Multicore CPU map cannot be unrolled (" + node.map.label + ")")
 
         constsize = all([not symbolic.issymbolic(v, sdfg.constants) for r in node.map.range for v in r])
@@ -1774,7 +1772,7 @@ class CPUCodeGen(TargetCodeGenerator):
                 state_id,
                 node,
             )
-            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
                 result.write("#pragma omp task\n", sdfg, state_id, node)
                 result.write("{\n", sdfg, state_id, node)
 
@@ -1786,7 +1784,7 @@ class CPUCodeGen(TargetCodeGenerator):
     def _generate_MapExit(self, sdfg, dfg, state_id, node, function_stream, callsite_stream):
         result = callsite_stream
 
-        if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+        if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
             result.write("}\n}\n", sdfg, state_id, node)
             result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
@@ -1812,7 +1810,7 @@ class CPUCodeGen(TargetCodeGenerator):
 
         for _ in map_node.map.range:
             result.write("}\n", sdfg, state_id, node)
-            if node.map.omp_schedule == dtypes.OMPScheduleType.Tasking:
+            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
                 result.write("}", sdfg, state_id, node)
 
         result.write(outer_stream.getvalue())
