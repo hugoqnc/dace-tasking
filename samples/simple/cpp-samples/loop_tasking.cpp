@@ -3,7 +3,7 @@
 
 int main(){
     #pragma omp parallel
-    #pragma omp single
+    #pragma omp single nowait
     for (auto i = 0; i < 99; i += 1) {
         {
             #pragma omp task
@@ -12,6 +12,7 @@ int main(){
             }
         }
     }
+    #pragma omp taskwait
     return 0;
 }
 
