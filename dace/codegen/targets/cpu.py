@@ -1772,7 +1772,8 @@ class CPUCodeGen(TargetCodeGenerator):
                 state_id,
                 node,
             )
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+            # Note we only generate task in the most outer loop
+            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
                 result.write("#pragma omp task\n", sdfg, state_id, node)
                 result.write("{\n", sdfg, state_id, node)
 
@@ -1785,7 +1786,7 @@ class CPUCodeGen(TargetCodeGenerator):
         result = callsite_stream
 
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            result.write("}\n}\n", sdfg, state_id, node)
+            result.write("}\n" * (len(node.map.range) - 1), sdfg, state_id, node)
             result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
         # Obtain start of map
