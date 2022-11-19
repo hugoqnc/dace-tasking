@@ -9,7 +9,7 @@ if test -f "$FILE_FOR"; then
     # exec file contains tasking implementation
     mv $FILE_EXEC $FILE_TASKING;
     mv $FILE_FOR $FILE_EXEC;
-    echo -e "$FILE_EXEC now contains ${RED}parallel for${NC} implementation";
+    echo "$FILE_EXEC now contains ${RED}parallel for${NC} implementation";
 else
     # exec file contains parallel for implementation
     mv $FILE_EXEC $FILE_FOR;

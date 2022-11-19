@@ -3,6 +3,7 @@
 
 set -a
 
+COMPILER_NAME="g++-12" # Change to your compiler name
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 PYTHONPATH=$SCRIPTPATH
 
@@ -65,14 +66,14 @@ testcmd() {
     #$* | tee -a test.log
     TESTCNT=`expr $TESTS - 1`
     MSG="($TESTCNT / $TOTAL_TESTS) $CURTEST (Fails: $ERRORS)"
-    ($* || echo "_TFAIL_ $?") |& awk "BEGIN{printf \"$MSG\r\"} /_TFAIL_/{printf \"$TGAP\r\"; exit \$NF} {printf \"$TGAP\r\"; print; printf \"$MSG\r\";} END{printf \"$TGAP\r\"}"
+    ($* || echo "_TFAIL_ $?") 2>&1| awk "BEGIN{printf \"$MSG\r\"} /_TFAIL_/{printf \"$TGAP\r\"; exit \$NF} {printf \"$TGAP\r\"; print; printf \"$MSG\r\";} END{printf \"$TGAP\r\"}"
 }
 
 ################################################
 
 runtest_cpp() {
     test_start $1
-    testcmd g++ -std=c++14 -Wall -Wextra -O3 -march=native -ffast-math -fopenmp -fPIC \
+    testcmd $COMPILER_NAME -std=c++14 -Wall -Wextra -O3 -march=native -ffast-math -fopenmp -fPIC \
         -I $SCRIPTPATH/dace/runtime/include $1 -o ./$1.out
     if [ $? -ne 0 ]; then bail "$1 (compilation)"; fi
     testcmd ./$1.out
