@@ -6,8 +6,8 @@ import argparse
 import dace
 import numpy as np
 import sys
-from dace.sdfg import nodes
-from dace.dtypes import OMPScheduleType
+from dace.sdfg import infer_types
+from dace.dtypes import ScheduleType
 
 # Define symbols for output size
 W = dace.symbol("W")
@@ -15,7 +15,7 @@ H = dace.symbol("H")
 
 
 @dace.program
-def mandelbrot(output: dace.uint16[H, W], maxiter: dace.int64):
+def mandelbrot_tasking(output: dace.uint16[H, W], maxiter: dace.int64):
     for py, px in dace.map[0:H, 0:W]:
         x0 = -2.5 + ((float(px) / W) * 3.5)
         y0 = -1 + ((float(py) / H) * 2)
@@ -75,11 +75,8 @@ if __name__ == "__main__":
     out = np.zeros([args.H, args.W], dtype=np.uint16)
 
     # Specify to use Tasking
-    g = mandelbrot.to_sdfg(simplify=True)
-    for node, _ in g.all_nodes_recursive():
-        if isinstance(node, nodes.EntryNode) or isinstance(node, nodes.ExitNode):
-            node.map.omp_schedule = OMPScheduleType.Tasking
-
+    g = mandelbrot_tasking.to_sdfg(simplify=True)
+    infer_types.set_default_schedule_and_storage_types(g, ScheduleType.CPU_Multicore_Tasking_Default)
     g(output=out, maxiter=args.iterations, H=out.shape[0], W=out.shape[1])
 
     print('Result:')
