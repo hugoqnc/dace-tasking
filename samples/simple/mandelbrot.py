@@ -6,6 +6,8 @@ import argparse
 import dace
 import numpy as np
 import sys
+from dace.sdfg import infer_types
+from dace.dtypes import ScheduleType
 
 # Define symbols for output size
 W = dace.symbol("W")
@@ -73,8 +75,15 @@ if __name__ == "__main__":
     out = np.zeros([args.H, args.W], dtype=np.uint16)
 
     # Run DaCe program
-    mandelbrot(out, args.iterations)
+    # Replicate the way we run the tasking version, to make a fair timing comparison
+    g = mandelbrot.to_sdfg(simplify=True)
+    infer_types.set_default_schedule_and_storage_types(g, ScheduleType.Default)
 
+    # Profiling
+    with dace.config.set_temporary('profiling', value=True):  # Enable profiling
+        with dace.config.set_temporary('treps', value=100):   # Run 100 times
+            g(output=out, maxiter=args.iterations, H=out.shape[0], W=out.shape[1])
+            
     print('Result:')
     printmatrix(out)
 

@@ -77,8 +77,10 @@ if __name__ == "__main__":
     # Specify to use Tasking
     g = mandelbrot_tasking.to_sdfg(simplify=True)
     infer_types.set_default_schedule_and_storage_types(g, ScheduleType.CPU_Multicore_Tasking_Default)
-    g(output=out, maxiter=args.iterations, H=out.shape[0], W=out.shape[1])
-
+    with dace.config.set_temporary('profiling', value=True):  # Enable profiling
+        with dace.config.set_temporary('treps', value=100):   # Run 100 times
+            g(output=out, maxiter=args.iterations, H=out.shape[0], W=out.shape[1])
+    
     print('Result:')
     printmatrix(out)
 
