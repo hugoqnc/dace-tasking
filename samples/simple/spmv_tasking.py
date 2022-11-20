@@ -68,11 +68,14 @@ if __name__ == "__main__":
     #########################
 
     # Run program
-    # b = spmv_tasking(A_row, A_col, A_val, x)
-
     g = spmv_tasking.to_sdfg(simplify=True)
     infer_types.set_default_schedule_and_storage_types(g, ScheduleType.CPU_Multicore_Tasking_Default)
-    b = g(A_row=A_row, A_col=A_col, A_val=A_val, x=x, W=x.shape[0], H=(A_row.shape[0]-1), nnz=A_col.shape[0])
+
+    b = None
+    # Profiling
+    with dace.config.set_temporary('profiling', value=True):  # Enable profiling
+        with dace.config.set_temporary('treps', value=1000):   # Run 1000 times
+            b = g(A_row=A_row, A_col=A_col, A_val=A_val, x=x, W=x.shape[0], H=(A_row.shape[0]-1), nnz=A_col.shape[0])
 
 
     # Check for correctness

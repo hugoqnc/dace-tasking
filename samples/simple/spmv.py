@@ -4,6 +4,8 @@
 import argparse
 import dace
 import numpy as np
+from dace.sdfg import infer_types
+from dace.dtypes import ScheduleType
 try:
     import scipy.sparse as sp
 except (ImportError, ModuleNotFoundError):
@@ -66,7 +68,15 @@ if __name__ == "__main__":
     #########################
 
     # Run program
-    b = spmv(A_row, A_col, A_val, x)
+    g = spmv.to_sdfg(simplify=True)
+    infer_types.set_default_schedule_and_storage_types(g, ScheduleType.Default)
+
+    b = None
+    # Profiling
+    with dace.config.set_temporary('profiling', value=True):  # Enable profiling
+        with dace.config.set_temporary('treps', value=1000):   # Run 1000 times
+            b = g(A_row=A_row, A_col=A_col, A_val=A_val, x=x, W=x.shape[0], H=(A_row.shape[0]-1), nnz=A_col.shape[0])
+
 
     # Check for correctness
     if sp is not None:
