@@ -16,8 +16,10 @@ simple_path = f"{BASE}/samples/simple"
 func = sys.argv[1]
 out_path = f"{func}.out"
 main_path = f"{simple_path}/.dacecache/{func}/sample/{func}_main.cpp"
-core_path = f"{simple_path}/.dacecache/{func}/src/cpu/{func}.cpp"
-command = compiler + " -o " + out_path + " -fopenmp " + main_path + " " + core_path + " -I" + dace_path + "/runtime/include/"
+core_path = f"{simple_path}/.dacecache/{func}/src/cpu/{func}_test.cpp"
+# "-fdump-tree-optimized"
+compiler_flags = " " + " ".join(["-std=c++14 -O3 -march=native -ffast-math", "-fopenmp"]) + " "
+command = compiler + " -o " + out_path + compiler_flags + main_path + " " + core_path + " -I" + dace_path + "/runtime/include/"
 print("\u001b[34m" + command + "\u001b[30m")
 os.system(command)
 
