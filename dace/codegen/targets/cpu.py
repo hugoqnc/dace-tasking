@@ -1787,7 +1787,6 @@ class CPUCodeGen(TargetCodeGenerator):
 
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
             result.write("}\n}\n", sdfg, state_id, node)
-            result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
         # Obtain start of map
         scope_dict = dfg.scope_dict()
@@ -1813,6 +1812,7 @@ class CPUCodeGen(TargetCodeGenerator):
             result.write("}\n", sdfg, state_id, node)
             if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
                 result.write("}", sdfg, state_id, node)
+                result.write("#pragma omp taskwait\n", sdfg, state_id, node)
 
         result.write(outer_stream.getvalue())
 
