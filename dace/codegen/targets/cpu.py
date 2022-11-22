@@ -79,7 +79,10 @@ class CPUCodeGen(TargetCodeGenerator):
 
         # Register dispatchers
         dispatcher.register_node_dispatcher(self)
-        dispatcher.register_map_dispatcher([dtypes.ScheduleType.CPU_Multicore, dtypes.ScheduleType.CPU_Multicore_Tasking, dtypes.ScheduleType.Sequential], self)
+        dispatcher.register_map_dispatcher([dtypes.ScheduleType.CPU_Multicore,
+                                            dtypes.ScheduleType.CPU_Multicore_Tasking,
+                                            dtypes.ScheduleType.CPU_Multicore_Tasking_Default,
+                                            dtypes.ScheduleType.Sequential], self)
 
         cpu_storage = [dtypes.StorageType.CPU_Heap, dtypes.StorageType.CPU_ThreadLocal, dtypes.StorageType.Register]
         dispatcher.register_array_dispatcher(cpu_storage, self)
