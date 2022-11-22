@@ -181,18 +181,23 @@ def generate_code(sdfg, validate=True) -> List[CodeObject]:
         # node expansion).
         sdfg = sdfg2
 
+    # Set the default schedule:
+    # Use `None` for original behavior with parallel for loops
+    # Use `dtypes.ScheduleType.CPU_Multicore_Tasking_Default` for tasking
+    default_schedule = None
+
     # Before generating the code, run type inference on the SDFG connectors
     infer_types.infer_connector_types(sdfg)
 
     # Set default storage/schedule types in SDFG
-    infer_types.set_default_schedule_and_storage_types(sdfg, None)
+    infer_types.set_default_schedule_and_storage_types(sdfg, default_schedule)
 
     # Recursively expand library nodes that have not yet been expanded
     sdfg.expand_library_nodes()
 
     # After expansion, run another pass of connector/type inference
     infer_types.infer_connector_types(sdfg)
-    infer_types.set_default_schedule_and_storage_types(sdfg, None)
+    infer_types.set_default_schedule_and_storage_types(sdfg, default_schedule)
 
     frame = framecode.DaCeCodeGenerator(sdfg)
 
