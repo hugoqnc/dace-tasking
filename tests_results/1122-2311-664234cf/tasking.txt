@@ -1,0 +1,19 @@
+================================================ short test summary info =================================================
+FAILED tests/npbench_cpu/misc/contour_integral_test.py::test_cpu - dace.codegen.exceptions.CompilerConfigurationError: Configuration failure:
+FAILED tests/npbench_cpu/misc/spmv_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/cholesky2_test.py::test_cpu - dace.codegen.exceptions.CompilerConfigurationError: Configuration failure:
+FAILED tests/npbench_cpu/polybench/cholesky_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/gramschmidt_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/lu_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/ludcmp_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/symm_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/trisolv_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+FAILED tests/npbench_cpu/polybench/trmm_test.py::test_cpu - dace.codegen.exceptions.CompilationError: Compiler failure:
+=================== 10 failed, 37 passed, 6 skipped, 158 deselected, 195 warnings in 206.63s (0:03:26) ===================
+
+tests/npbench_cpu/deep_learning/resnet_test.py s 
+tests/npbench_cpu/misc/crc16_test.py s 
+tests/npbench_cpu/misc/mandelbrot1_test.py s   
+tests/npbench_cpu/misc/mandelbrot2_test.py s 
+tests/npbench_cpu/misc/stockham_fft_test.py s
+tests/npbench_cpu/polybench/durbin_test.py s 

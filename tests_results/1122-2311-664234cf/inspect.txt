@@ -1,0 +1,2 @@
+Configuration error: can't find blas library `#include '../dace_blas.h'`
+Compilation error: `for (auto __unused = 0; __unused < 1; __unused += 1) {`
