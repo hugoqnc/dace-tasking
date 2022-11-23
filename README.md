@@ -22,7 +22,7 @@ cd samples/simple && python axpy.py # Use tasking backend now.
 ## Experiments
 ### pytests
 1. run `test_results/test_mkdir.sh`.
-2. run `test_results/test_run.sh -v [for OR tasking] -d [empty OR subdir in tests/npbench_cpu OR file in tests/npbench_cpu]`. DO NOT use it to run the original unmodified DaCe.
+2. run `test_results/test_run.sh [-t: if tasking] -d [empty OR subdir in tests/npbench_cpu OR file in tests/npbench_cpu]`. Doesn't require a .dace.conf file. DO NOT use it to run the original unmodified DaCe.
 3. Save terminal outputs to folder "`date-time-commitHash`".
 
 ### utils
@@ -34,7 +34,7 @@ cd samples/simple && python axpy.py # Use tasking backend now.
 + `tests/npbench_cpu/replace.sh`: add cpu marker to `test_cpu()` if not added.
 + `tests_results/test_mkdir.sh`: create a folder "`date-time-commitHash`" with files to save test results.
 + `test_results/test_run.sh`: 
-  - change `dace/codegen/codegen.py`'s `default_schedule` to be target ScheduleType.
+  - export env var DACE_compiler_cpu_openmp_tasking
   - `pytest -m "cpu" tests/npbench_cpu/(subdir or file)`
 
 ### NPBench performance measurement

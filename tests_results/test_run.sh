@@ -29,34 +29,38 @@ if [ ! -d $TESTS ] && [ ! -f $TESTS ]; then
     echo "no such tests: $TESTS"; exit 1;
 fi
 
-CONFIG="$HOME/.dace.conf"
-if [ ! -f $CONFIG ]; then 
-    echo "file doesn't exist: $CONFIG"; exit 1;
-fi
+# compiler.cpu.openmp_tasing: true
+# does need a .dace.conf file
+echo "... tasking: $TASKING"
+export DACE_compiler_cpu_openmp_tasking=$TASKING
+
+# run tests
+DATE=$(date +"%Y-%m-%d")
+COMMIT=$(git rev-parse --short HEAD)
+echo "... date: $DATE, commit: $COMMIT"
+
+echo "... running tests: $TESTS" 
+pytest -m "cpu" $TESTS
+
+# CONFIG="$HOME/.dace.conf"
+# if [ ! -f $CONFIG ]; then 
+#     echo "file doesn't exist: $CONFIG"; exit 1;
+# fi
 
 # Set the default schedule in codegen.py:
 # Use `None` for original behavior with parallel for loops
 # Use `dtypes.ScheduleType.CPU_Multicore_Tasking_Default` for tasking
-NEWLINE="openmp_tasking: $TASKING"
-if [ "$TASKING" == "true" ]; then
-    OLDLINE="openmp_tasking: false"
-else
-    OLDLINE="openmp_tasking: true"
-fi
+# NEWLINE="openmp_tasking: $TASKING"
+# if [ "$TASKING" == "true" ]; then
+#     OLDLINE="openmp_tasking: false"
+# else
+#     OLDLINE="openmp_tasking: true"
+# fi
 
-if ! grep -Fxq "$NEWLINE" $CONFIG; then
-    echo "... $OLDLINE => $NEWLINE"
-	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $CONFIG
-fi
+# if ! grep -Fxq "$NEWLINE" $CONFIG; then
+#     echo "... $OLDLINE => $NEWLINE"
+# 	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $CONFIG
+# fi
 
-export DACE_CONFIG=$CONFIG
-
-# run tests
-DATE=$(date +"%m%d")
-COMMIT=$(git rev-parse --short HEAD)
-echo "... running tests $TESTS" 
-echo "... date: $DATE, commit: $COMMIT"
-
-pytest -m "cpu" $TESTS
 
 
