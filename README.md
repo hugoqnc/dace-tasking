@@ -9,6 +9,16 @@
   - define ScheduleTypes: `CPU_Multicore` = for, `CPU_Multicore_Tasking_Default` = tasking, `CPU_Multicore_Tasking` = parallel part of tasking 
   - `None` = `CPU_Multicore`
 
+## Configuration
+
+Use `DACE_CONFIG` to specify the configuration files.
+
+```bash
+export DACE_CONFIG=/path/to/dace/repo/tests/tasking.conf
+# or: `cp tests/tasking.conf ~/.dace.conf` so that it is persistent
+cd samples/simple && python axpy.py # Use tasking backend now.
+```
+
 ## Experiments
 ### pytests
 1. run `test_results/test_mkdir.sh`.

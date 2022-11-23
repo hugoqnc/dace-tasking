@@ -2323,7 +2323,7 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
                                           "{})".format(type(expected).__name__, arg))
 
     def __call__(self, *args, **kwargs):
-        """ Invokes an SDFG, generating and compiling code if necessary. """
+        """ Invokes an SDFG, generating and compiling code if necessary. """        
         if Config.get_bool('optimizer', 'transform_on_call'):
             sdfg = self.optimize()
         else:

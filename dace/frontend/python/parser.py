@@ -469,6 +469,12 @@ class DaceProgram(pycommon.SDFGConvertible):
         from dace.transformation.passes import scalar_to_symbol as scal2sym
         from dace.transformation import helpers as xfh
 
+        # Modify the default schedule type accordingly
+        # Since users might apply transformation after sdfg is generated, we can't do this any later.
+        from dace.dtypes import SCOPEDEFAULT_SCHEDULE, ScheduleType
+        if Config.get_bool("compiler", "cpu", "openmp_tasking"):
+            SCOPEDEFAULT_SCHEDULE[None] = ScheduleType.CPU_Multicore_Tasking
+
         # Obtain DaCe program as SDFG
         sdfg, cached = self._generate_pdp(args, kwargs, simplify=simplify)
 
