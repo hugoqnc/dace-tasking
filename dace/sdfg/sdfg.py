@@ -29,6 +29,7 @@ from dace.sdfg.validation import (InvalidSDFGError, validate_sdfg)
 from dace.config import Config
 from dace.frontend.python import astutils, wrappers
 from dace.sdfg import nodes as nd
+from dace.dtypes import SCOPEDEFAULT_SCHEDULE, ScheduleType
 from dace.sdfg.graph import OrderedDiGraph, Edge, SubgraphView
 from dace.sdfg.state import SDFGState
 from dace.sdfg.propagation import propagate_memlets_sdfg
@@ -2324,6 +2325,10 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
 
     def __call__(self, *args, **kwargs):
         """ Invokes an SDFG, generating and compiling code if necessary. """
+
+        if Config.get_bool("compiler", "cpu", "openmp_tasking"):
+            SCOPEDEFAULT_SCHEDULE[None] = ScheduleType.CPU_Multicore_Tasking_Default        
+
         if Config.get_bool('optimizer', 'transform_on_call'):
             sdfg = self.optimize()
         else:

@@ -265,6 +265,14 @@ required:
                             generate "#pragma omp parallel sections" code around
                             them.
 
+                    openmp_tasking:
+                        type: bool
+                        default: false
+                        title: Use dace tasking backend by default
+                        description: > 
+                            If set to true, dace will generate "#pragma omp task"
+                            instead of "#pragma parrallel for".
+
             #############################################
             # GPU (CUDA/HIP) compiler
             cuda:
