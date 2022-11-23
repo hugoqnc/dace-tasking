@@ -1,29 +1,31 @@
 # DPHPC HS2022
 ## Code Explanation
-+ dace/codegen/targets/cpu.py
++ `dace/codegen/targets/cpu.py`
   - register supported ScheduleType with dispatcher
   - generate task/for depending on MapEntry/MapExit ScheduleType
-+ dace/codegen/codegen.py
-  - set default schedule and storage: the default default is None
-+ dace/dtypes.py
-  - define ScheduleTypes: CPU_Multicore = for, CPU_Multicore_Tasking_Default = tasking, CPU_Multicore_Tasking = parallel part of tasking 
-  - None = CPU_Multicore
++ `dace/codegen/codegen.py`
+  - set default schedule and storage: the default default is `None`
++ `dace/dtypes.py`
+  - define ScheduleTypes: `CPU_Multicore` = for, `CPU_Multicore_Tasking_Default` = tasking, `CPU_Multicore_Tasking` = parallel part of tasking 
+  - `None` = `CPU_Multicore`
 
 ## Experiments
 ### pytests
 1. run `test_results/test_mkdir.sh`.
 2. run `test_results/test_run.sh -v [for OR tasking] -d [empty OR subdir in tests/npbench_cpu OR file in tests/npbench_cpu]`. DO NOT use it to run the original unmodified DaCe.
-3. Save terminal outputs to folder "date-time-commitHash".
+3. Save terminal outputs to folder "`date-time-commitHash`".
 
 ### utils
-!!! The utils use `sed -i '' -e` for macOS, modify them to work on Linux or Windows !!!\
-!!! You can also run things manually following the steps given in the utils !!!\
-+ jz_test branch: runFromCache.py: compile and run cpp files in .dacecache, measure with `time`, not accurate.
-+ tests/npbench_cpu/replace.sh: add cpu marker to test_cpu() if not added.
-+ tests_results/test_mkdir.sh: create a folder "date-time-commitHash" with files to save test results.
-+ test_results/test_run.sh: 
-  - change dace/codegen/codegen.py `default_schedule` to be target ScheduleType.\
-  - `pytest -m "cpu" tests/npbench_cpu/(subdir or file)`\
+> **Warning** The utils use `sed -i '' -e` for macOS, modify them to work on Linux or Windows
+
+> **Note** You can also run things manually following the steps given in the utils
+
++ jz_test branch: `runFromCache.py`: compile and run cpp files in `.dacecache`, measure with `time`, not accurate.
++ `tests/npbench_cpu/replace.sh`: add cpu marker to `test_cpu()` if not added.
++ `tests_results/test_mkdir.sh`: create a folder "`date-time-commitHash`" with files to save test results.
++ `test_results/test_run.sh`: 
+  - change `dace/codegen/codegen.py`'s `default_schedule` to be target ScheduleType.
+  - `pytest -m "cpu" tests/npbench_cpu/(subdir or file)`
 
 ### NPBench performance measurement
 TODO
