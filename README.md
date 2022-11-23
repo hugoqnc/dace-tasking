@@ -14,7 +14,7 @@
 Use `DACE_CONFIG` to specify the configuration files.
 
 ```bash
-export DACE_CONFIG=tests/tasking.conf
+export DACE_CONFIG=/path/to/dace/repo/tests/tasking.conf
 # or: `cp tests/tasking.conf ~/.dace.conf` so that it is persistent
 cd samples/simple && python axpy.py # Use tasking backend now.
 ```
