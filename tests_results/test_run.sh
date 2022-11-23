@@ -4,22 +4,23 @@ help() {
 cat << EOF
 Usage:
     -h ... help
-    -v ... for OR tasking
+    -t ... is tasking
     -d ... empty OR subdir in tests/npbench_cpu OR file in tests/npbench_cpu
 EOF
 }
 
+TASKING="false"
 # read opts
-while getopts ":hv:d:" opt
+while getopts ":htd:" opt
 do
     case $opt in
         h) help; exit 1;;
-        v) VERSION=$OPTARG;;
+        t) TASKING="true";;
         d) TARGET=$OPTARG;;
     esac
 done
-
-if [ "$VERSION" != "for" ] && [ "$VERSION" != "tasking" ]; then
+    
+if [ "$TASKING" != "true" ] && [ "$TASKING" != "false" ]; then
     help; exit 1;
 fi
 
@@ -28,30 +29,27 @@ if [ ! -d $TESTS ] && [ ! -f $TESTS ]; then
     echo "no such tests: $TESTS"; exit 1;
 fi
 
-DTYPES="../dace/dtypes.py"
-if [ ! -f $DTYPES ]; then 
-    echo "file doesn't exist: $DTYPES"; exit 1;
+CONFIG="$HOME/.dace.conf"
+if [ ! -f $CONFIG ]; then 
+    echo "file doesn't exist: $CONFIG"; exit 1;
 fi
 
 # Set the default schedule in codegen.py:
 # Use `None` for original behavior with parallel for loops
 # Use `dtypes.ScheduleType.CPU_Multicore_Tasking_Default` for tasking
-schedule_task="ScheduleType.CPU_Multicore_Tasking"
-schedule_for="ScheduleType.CPU_Multicore"
-OLDLINE="None: "
-NEWLINE="None: "
-if [ "$VERSION" == "for" ]; then
-    OLDLINE+=$schedule_task
-    NEWLINE+=$schedule_for
+NEWLINE="openmp_tasking: $TASKING"
+if [ "$TASKING" == "true" ]; then
+    OLDLINE="openmp_tasking: false"
 else
-    OLDLINE+=$schedule_for
-    NEWLINE+=$schedule_task
+    OLDLINE="openmp_tasking: true"
 fi
 
-if grep -Fxq "$NEWLINE" $DTYPES; then
+if ! grep -Fxq "$NEWLINE" $CONFIG; then
     echo "... $OLDLINE => $NEWLINE"
-	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $DTYPES
+	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $CONFIG
 fi
+
+export DACE_CONFIG=$CONFIG
 
 # run tests
 DATE=$(date +"%m%d")
