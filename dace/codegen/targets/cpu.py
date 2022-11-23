@@ -1788,9 +1788,6 @@ class CPUCodeGen(TargetCodeGenerator):
     def _generate_MapExit(self, sdfg, dfg, state_id, node, function_stream, callsite_stream):
         result = callsite_stream
 
-        if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            result.write("}\n}\n", sdfg, state_id, node)
-
         # Obtain start of map
         scope_dict = dfg.scope_dict()
         map_node = scope_dict[node]
@@ -1812,10 +1809,18 @@ class CPUCodeGen(TargetCodeGenerator):
         self.generate_scope_postamble(sdfg, dfg, state_id, function_stream, outer_stream, callsite_stream)
 
         for i, _ in  enumerate(map_node.map.range):
+            # for loop close
             result.write("}\n", sdfg, state_id, node)
+            # omp task close: outermost loop
             if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
                 result.write("}", sdfg, state_id, node)
-                result.write("#pragma omp taskwait\n", sdfg, state_id, node)
+        
+        if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+            # omp single close
+            result.write("}\n", sdfg, state_id, node)
+            result.write("#pragma omp taskwait\n", sdfg, state_id, node)
+            # omp parallel close
+            result.write("}\n", sdfg, state_id, node)
 
         result.write(outer_stream.getvalue())
 

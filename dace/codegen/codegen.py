@@ -184,6 +184,7 @@ def generate_code(sdfg, validate=True) -> List[CodeObject]:
     # Set the default schedule:
     # Use `None` for original behavior with parallel for loops
     # Use `dtypes.ScheduleType.CPU_Multicore_Tasking_Default` for tasking
+    # JZ: keep it None for now
     default_schedule = None
 
     # Before generating the code, run type inference on the SDFG connectors

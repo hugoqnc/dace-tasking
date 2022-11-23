@@ -202,7 +202,7 @@ SCOPEDEFAULT_STORAGE = {
 # Maps from ScheduleType to default ScheduleType for sub-scopes
 SCOPEDEFAULT_SCHEDULE = {
     ScheduleType.Default: ScheduleType.Default,
-    None: ScheduleType.CPU_Multicore,
+    None: ScheduleType.CPU_Multicore_Tasking,
     ScheduleType.Sequential: ScheduleType.Sequential,
     ScheduleType.MPI: ScheduleType.CPU_Multicore,
     ScheduleType.CPU_Multicore: ScheduleType.Sequential,
