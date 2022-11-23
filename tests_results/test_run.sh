@@ -28,27 +28,29 @@ if [ ! -d $TESTS ] && [ ! -f $TESTS ]; then
     echo "no such tests: $TESTS"; exit 1;
 fi
 
-CODEGEN="../dace/codegen/codegen.py"
-if [ ! -f $CODEGEN ]; then 
-    echo "file doesn't exist: $CODEGEN"; exit 1;
+DTYPES="../dace/dtypes.py"
+if [ ! -f $DTYPES ]; then 
+    echo "file doesn't exist: $DTYPES"; exit 1;
 fi
 
 # Set the default schedule in codegen.py:
 # Use `None` for original behavior with parallel for loops
 # Use `dtypes.ScheduleType.CPU_Multicore_Tasking_Default` for tasking
-OLDLINE="default_schedule = "
-NEWLINE="default_schedule = "
+schedule_task="ScheduleType.CPU_Multicore_Tasking"
+schedule_for="ScheduleType.CPU_Multicore"
+OLDLINE="None: "
+NEWLINE="None: "
 if [ "$VERSION" == "for" ]; then
-    OLDLINE+="dtypes\.ScheduleType\.CPU_Multicore_Tasking_Default"
-    NEWLINE+="None"
+    OLDLINE+=$schedule_task
+    NEWLINE+=$schedule_for
 else
-    OLDLINE+="None"
-    NEWLINE+="dtypes\.ScheduleType\.CPU_Multicore_Tasking_Default"
+    OLDLINE+=$schedule_for
+    NEWLINE+=$schedule_task
 fi
 
-if ! grep -Fxq "$OLDLINE" $CODEGEN; then
+if grep -Fxq "$NEWLINE" $DTYPES; then
     echo "... $OLDLINE => $NEWLINE"
-	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $CODEGEN
+	sed -i '' -e "s/$OLDLINE/$NEWLINE/g" $DTYPES
 fi
 
 # run tests
