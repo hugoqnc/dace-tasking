@@ -818,8 +818,11 @@ class Map(object):
                                desc="Number of OpenMP threads executing the Map",
                                optional=True,
                                optional_condition=lambda m: m.schedule == dtypes.ScheduleType.CPU_Multicore)
+    default_omp_schedule = dtypes.OMPScheduleType.Default
+    if Config.get_bool("compiler", "cpu", "openmp_dynamic_schedule"):
+        default_omp_schedule = dtypes.OMPScheduleType.Dynamic
     omp_schedule = EnumProperty(dtype=dtypes.OMPScheduleType,
-                                default=dtypes.OMPScheduleType.Default,
+                                default=default_omp_schedule,
                                 desc="OpenMP schedule {static, dynamic, guided}",
                                 optional=True,
                                 optional_condition=lambda m: m.schedule == dtypes.ScheduleType.CPU_Multicore)
