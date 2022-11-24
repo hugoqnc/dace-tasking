@@ -45,7 +45,8 @@ class ExpandDotPure(ExpandTransformation):
         state = sdfg.add_state_after(init_state, node.label + "_state")
 
         # Initialization map
-        init_state.add_mapped_tasklet("_i_dotnit", {"__unused": "0:1"}, {},
+        # JZ
+        init_state.add_mapped_tasklet("_i_dotnit", {"_unused_var": "0:1"}, {},
                                       "_out = 0", {"_out": dace.Memlet("_result[0]")},
                                       external_edges=True)
 
