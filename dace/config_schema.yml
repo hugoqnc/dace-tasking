@@ -272,6 +272,14 @@ required:
                         description: > 
                             If set to true, dace will generate "#pragma omp task"
                             instead of "#pragma parrallel for".
+                    
+                    openmp_dynamic_schedule:
+                        type: bool
+                        default: false
+                        title: Use dynamic schedule by default
+                        description: > 
+                            If set to true, dace will generate "#pragma omp parallel for schedule(dynamic)"
+                            instead of "#pragma parrallel for".
 
             #############################################
             # GPU (CUDA/HIP) compiler

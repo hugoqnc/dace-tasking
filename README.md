@@ -19,6 +19,11 @@ export DACE_CONFIG=/path/to/dace/repo/tests/tasking.conf
 cd samples/simple && python axpy.py # Use tasking backend now.
 ```
 
+Sample DACE_CONFIG to use `dyanamic` schedule with `parallel for` loops:
+```bash
+export DACE_CONFIG=tests/dynamic_schedule.conf
+```
+
 ## Experiments
 ### pytests
 1. run `test_results/test_mkdir.sh`.
