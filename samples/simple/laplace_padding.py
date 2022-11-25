@@ -14,6 +14,7 @@ N = dace.symbol('N')
 def laplace_padding(A: dace.float64[N], T: dace.int64):
     # Define transient (temporary) array
     tmp = np.zeros((N, 64), dtype=dace.float64)
+    tmp1 = np.zeros((N, 64), dtype=dace.float64)
 
     # This loop will remain a loop
     for _ in range(T):
@@ -24,7 +25,10 @@ def laplace_padding(A: dace.float64[N], T: dace.int64):
             # tmp[i] = np.sum(A[i - 1:i + 2] * np.array([1, -2, 1]))
 
         for i in dace.map[1:N - 1]:
-            A[i] = tmp[i - 1,0] - 2 * tmp[i,0] + tmp[i + 1,0]
+            tmp1[i,0] = tmp[i - 1,0] - 2 * tmp[i,0] + tmp[i + 1,0]
+
+        # Uses dace::CopyNDDynamic (with both taksing and for backends)
+        A = tmp1[:,0]
 
 
 if __name__ == "__main__":
