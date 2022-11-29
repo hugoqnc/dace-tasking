@@ -349,6 +349,7 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
 
         components = dace.sdfg.concurrent_subgraphs(state)
 
+        # JZ
         if len(components) <= 1:
             self._dispatcher.dispatch_subgraph(sdfg, state, sid, global_stream, callsite_stream, skip_entry_node=False)
         else:

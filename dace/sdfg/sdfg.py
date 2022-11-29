@@ -353,6 +353,7 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
 
     logical_groups = ListProperty(element_type=LogicalGroup, desc='Logical groupings of nodes and edges')
 
+    # JZ
     openmp_sections = Property(dtype=bool,
                                default=Config.get_bool('compiler', 'cpu', 'openmp_sections'),
                                desc='Whether to generate OpenMP sections in code')
