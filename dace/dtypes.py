@@ -53,6 +53,26 @@ class OMPScheduleType(aenum.AutoNumberEnum):
     Dynamic = ()  #: Dynamic schedule
     Guided = ()  #: Guided schedule
 
+# Workaround due to the limitation property system (Map/MapEntry shares the same 
+# property and getting error when trying to add any property to MapExit).
+@undefined_safe_enum
+@extensible_enum
+class OMPTaskingScopeType(aenum.AutoNumberEnum):
+    """ Identify a big block of tasking, only make sense with CPU_Multicore_Tasking_Block"""
+    Start = () # omp parallel + omp single
+    Scope = () # do nothing
+    EndNoWait = () # end a scope without wait
+    End = () # omp taskwait
+
+
+@undefined_safe_enum
+@extensible_enum
+class OMPTaskingBlockType(aenum.AutoNumberEnum):
+    """ Identify a big block of tasking, only make sense with CPU_Multicore_Tasking_Block"""
+    Start = () # New omp task
+    Block = () # Do nothing, just generates the code
+    End = () # Close an omp task
+
 
 @undefined_safe_enum
 @extensible_enum
@@ -64,6 +84,7 @@ class ScheduleType(aenum.AutoNumberEnum):
     CPU_Multicore = ()  #: OpenMP
     CPU_Multicore_Tasking = () # OpenMP Tasking backend
     CPU_Multicore_Tasking_Default = ()
+    CPU_Multicore_Tasking_Block = ()
     Unrolled = ()  #: Unrolled code
     SVE_Map = ()  #: Arm SVE
 
@@ -187,6 +208,7 @@ SCOPEDEFAULT_STORAGE = {
     ScheduleType.Sequential: StorageType.Register,
     ScheduleType.MPI: StorageType.CPU_Heap,
     ScheduleType.CPU_Multicore: StorageType.Register,
+    ScheduleType.CPU_Multicore_Tasking_Block: StorageType.Register,
     ScheduleType.CPU_Multicore_Tasking: StorageType.Register,
     ScheduleType.CPU_Multicore_Tasking_Default: StorageType.CPU_Heap,
     ScheduleType.GPU_Default: StorageType.GPU_Global,
@@ -206,6 +228,7 @@ SCOPEDEFAULT_SCHEDULE = {
     ScheduleType.Sequential: ScheduleType.Sequential,
     ScheduleType.MPI: ScheduleType.CPU_Multicore,
     ScheduleType.CPU_Multicore: ScheduleType.Sequential,
+    ScheduleType.CPU_Multicore_Tasking_Block: ScheduleType.Sequential,
     ScheduleType.CPU_Multicore_Tasking: ScheduleType.Sequential,
     ScheduleType.CPU_Multicore_Tasking_Default: ScheduleType.CPU_Multicore_Tasking,
     ScheduleType.Unrolled: ScheduleType.CPU_Multicore,

@@ -82,6 +82,7 @@ class CPUCodeGen(TargetCodeGenerator):
         dispatcher.register_map_dispatcher([dtypes.ScheduleType.CPU_Multicore,
                                             dtypes.ScheduleType.CPU_Multicore_Tasking,
                                             dtypes.ScheduleType.CPU_Multicore_Tasking_Default,
+                                            dtypes.ScheduleType.CPU_Multicore_Tasking_Block,
                                             dtypes.ScheduleType.Sequential], self)
 
         cpu_storage = [dtypes.StorageType.CPU_Heap, dtypes.StorageType.CPU_ThreadLocal, dtypes.StorageType.Register]
@@ -1691,7 +1692,9 @@ class CPUCodeGen(TargetCodeGenerator):
 
         # Encapsulate map with a C scope
         # TODO: Refactor out of MapEntry generation (generate_scope_header?)
-        callsite_stream.write('{', sdfg, state_id, node)
+        # We are manually managing the scope
+        if node.map.schedule != dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+            callsite_stream.write('{', sdfg, state_id, node)
 
         # Define all input connectors of this map entry
         for e in dynamic_map_inputs(state_dfg, node):
@@ -1750,6 +1753,19 @@ class CPUCodeGen(TargetCodeGenerator):
             map_header += "{\n"
             map_header += "#pragma omp single nowait\n"
             map_header += "{\n"
+        elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+            if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.Start:
+                map_header += "#pragma omp parallel\n"
+                map_header += "{ // Tasking scope starts!\n"
+                map_header += "#pragma omp single nowait\n"
+                map_header += "{\n"
+            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start:
+                map_header += "#pragma omp task\n"
+                map_header += "{ // Task block starts!\n{\n"  # Two "{"" !
+            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
+                map_header += "{ // Tasking block content\n"
+            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End:
+                map_header += "{ // Tasking block going to end\n"
 
         # TODO: Explicit map unroller
         if node.map.unroll:
@@ -1821,10 +1837,32 @@ class CPUCodeGen(TargetCodeGenerator):
             result.write("#pragma omp taskwait\n", sdfg, state_id, node)
             # omp parallel close
             result.write("}\n", sdfg, state_id, node)
+        elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
+                pass
+            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End:
+                # close previous mapentry {
+                result.write("} // Tasking block ends\n", sdfg, state_id, node)
+                # omp task close
+                result.write("} // Tasking block ends\n", sdfg, state_id, node)
+            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start:
+                result.write("}\n", sdfg, state_id, node)
+
+            if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.End:
+                # omp single close
+                result.write("}\n", sdfg, state_id, node)
+                result.write("#pragma omp taskwait\n", sdfg, state_id, node)
+                # omp parallel close
+                result.write("} // Task scope ends\n", sdfg, state_id, node)
+        
+            
+                
 
         result.write(outer_stream.getvalue())
 
-        callsite_stream.write('}', sdfg, state_id, node)
+        # We are manually managing the scope
+        if node.map.schedule != dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+            callsite_stream.write('}', sdfg, state_id, node)
 
     def _generate_ConsumeEntry(
         self,

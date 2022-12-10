@@ -831,6 +831,18 @@ class Map(object):
                               desc="OpenMP schedule chunk size",
                               optional=True,
                               optional_condition=lambda m: m.schedule == dtypes.ScheduleType.CPU_Multicore)
+    
+    omp_tasking_scope = EnumProperty(dtype=dtypes.OMPTaskingScopeType,
+                                     default=dtypes.OMPTaskingScopeType.Scope,
+                                     desc = "OpenMP tasking block scope {start, endnowait, end}",
+                                     optional=True,
+                                     optional_condition = lambda m: m.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block)
+
+    omp_tasking_block = EnumProperty(dtype=dtypes.OMPTaskingBlockType,
+                                     default=dtypes.OMPTaskingBlockType.Block,
+                                     desc = "OpenMP tasking block {start, block, end}",
+                                     optional=True,
+                                     optional_condition = lambda m: m.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block)
 
     gpu_block_size = ListProperty(element_type=int,
                                   default=None,
