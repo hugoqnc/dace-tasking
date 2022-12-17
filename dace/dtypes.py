@@ -72,6 +72,7 @@ class OMPTaskingBlockType(aenum.AutoNumberEnum):
     Start = () # New omp task
     Block = () # Do nothing, just generates the code
     End = () # Close an omp task
+    StartAndEnd = () # New omp task and close it
 
 
 @undefined_safe_enum

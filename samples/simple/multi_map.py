@@ -5,13 +5,18 @@ import argparse
 import dace
 import numpy as np
 
+from typing import List
+from dace.sdfg.sdfg import SDFG
+from dace.sdfg.nodes import MapEntry, MapExit, AccessNode
+from dace.dtypes import ScheduleType, OMPTaskingBlockType, OMPTaskingScopeType
+
 # Define a symbol so that the vectors could have arbitrary sizes and compile the code once
 # (this step is not necessary for arrays with known sizes)
 N = dace.symbol('N')
 
 
 # Define the program
-def test(A: dace.float64[N], T: dace.int64):
+def multi_map(A: dace.float64[N], T: dace.int64):
     # Define transient (temporary) array
     tmp1 = np.zeros_like(A)
     tmp2 = np.zeros_like(A)
@@ -40,19 +45,47 @@ def test(A: dace.float64[N], T: dace.int64):
         for i in dace.map[1:N - 1]:
             A[i] = tmp1[i] + tmp2[i] + tmp3[i] + tmp4[i]
 
+def optimize_tasking(sdfg: SDFG) -> SDFG:
+    edges = list(sdfg.all_edges_recursive())
+
+    maps: List[MapEntry] = []
+
+    for edge, state in edges:
+        dst = edge.dst
+        src = edge.src
+
+        if isinstance(src, AccessNode) and src.label == 'A':
+            if isinstance(dst, MapEntry):
+                dst.map.schedule = ScheduleType.CPU_Multicore_Tasking_Block
+                maps.append(dst)
+
+    for i in range(len(maps)):
+        maps[i].map.omp_tasking_block = OMPTaskingBlockType.StartAndEnd
+        if i == 0:
+            maps[i].map.omp_tasking_scope = OMPTaskingScopeType.Start
+        if i == len(maps) - 1:
+            maps[i].map.omp_tasking_scope = OMPTaskingScopeType.End
+
+    return sdfg
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", type=int, nargs="?", default=1024)
     parser.add_argument("iterations", type=int, nargs="?", default=100)
+    parser.add_argument("--opt", default=False, action="store_true")
     args = parser.parse_args()
 
     # Create a data-centric version of the program
-    dace_test = dace.program(test)
+    g = dace.program(multi_map).to_sdfg()
+
+    if args.opt:
+        g = optimize_tasking(g)
 
     # Set initial values
     A = np.random.rand(args.N)
 
     # Time the result by enabling profiling
     with dace.config.set_temporary('profiling', value=True):
-        dace_test(A, args.iterations)
+        with dace.config.set_temporary('treps', value=100):
+            g(A=A, T=args.iterations, N=args.N)

@@ -1759,7 +1759,7 @@ class CPUCodeGen(TargetCodeGenerator):
                 map_header += "{ // Tasking scope starts!\n"
                 map_header += "#pragma omp single nowait\n"
                 map_header += "{\n"
-            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start:
+            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
                 map_header += "#pragma omp task\n"
                 map_header += "{ // Task block starts!\n{\n"  # Two "{"" !
             elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
@@ -1840,7 +1840,7 @@ class CPUCodeGen(TargetCodeGenerator):
         elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
             if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
                 pass
-            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End:
+            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
                 # close previous mapentry {
                 result.write("} // Tasking block ends\n", sdfg, state_id, node)
                 # omp task close

@@ -834,13 +834,13 @@ class Map(object):
     
     omp_tasking_scope = EnumProperty(dtype=dtypes.OMPTaskingScopeType,
                                      default=dtypes.OMPTaskingScopeType.Scope,
-                                     desc = "OpenMP tasking block scope {start, endnowait, end}",
+                                     desc = "OpenMP tasking block scope {Start, EndNoWait, End}",
                                      optional=True,
                                      optional_condition = lambda m: m.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block)
 
     omp_tasking_block = EnumProperty(dtype=dtypes.OMPTaskingBlockType,
                                      default=dtypes.OMPTaskingBlockType.Block,
-                                     desc = "OpenMP tasking block {start, block, end}",
+                                     desc = "OpenMP tasking block {Start, Block, End, StartAndEnd}",
                                      optional=True,
                                      optional_condition = lambda m: m.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block)
 
