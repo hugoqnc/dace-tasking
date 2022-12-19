@@ -69,6 +69,47 @@ def optimize_tasking(sdfg: SDFG) -> SDFG:
     return sdfg
 
 
+def gt_multi_map(A, T, N):
+    # Define transient (temporary) array
+    tmp1 = np.zeros_like(A)
+    tmp2 = np.zeros_like(A)
+    tmp3 = np.zeros_like(A)
+    tmp4 = np.zeros_like(A)
+
+    # This loop will remain a loop
+    for _ in range(T):
+        # This loop will become a parallel map
+        for i in range(1, N-1):
+            tmp1[i] = A[i - 1] - 1 * A[i] + A[i + 1]
+
+        # This loop will become a parallel map
+        for i in range(1, N-1):
+            tmp2[i] = A[i - 1] - 2 * A[i] + A[i + 1]
+
+        # This loop will become a parallel map
+        for i in range(1, N-1):
+            tmp3[i] = A[i - 1] - 3 * A[i] + A[i + 1]
+
+        # This loop will become a parallel map
+        for i in range(1, N-1):
+            tmp4[i] = A[i - 1] - 4 * A[i] + A[i + 1]
+
+        for i in range(1, N-1):
+            A[i] = tmp1[i] + tmp2[i] + tmp3[i] + tmp4[i]
+    
+def validate(g, T, N):
+    for _ in range(50):
+        A = np.random.rand(N)
+        gt_A = np.copy(A)
+
+        g(A=A, T=T, N=N)
+        gt_multi_map(gt_A, T, N)
+
+        print(A, gt_A)
+        diff = np.linalg.norm(gt_A - A) / np.linalg.norm(gt_A)
+        assert diff < 1e-6
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", type=int, nargs="?", default=1024)
@@ -78,14 +119,16 @@ if __name__ == "__main__":
 
     # Create a data-centric version of the program
     g = dace.program(multi_map).to_sdfg()
+    # g._regenerate_code = False
 
     if args.opt:
         g = optimize_tasking(g)
 
-    # Set initial values
-    A = np.random.rand(args.N)
+    # validate(g, args.iterations, args.N)
+    # print("Valid!")
 
-    # Time the result by enabling profiling
+    # measure time
+    A = np.random.rand(args.N)
     with dace.config.set_temporary('profiling', value=True):
         with dace.config.set_temporary('treps', value=100):
             g(A=A, T=args.iterations, N=args.N)
