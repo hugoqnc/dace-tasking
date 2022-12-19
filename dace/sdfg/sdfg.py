@@ -439,6 +439,9 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
         self._orig_name = name
         self._num = 0
 
+        # JZ
+        self._top_level_open = True
+
     @property
     def sdfg_id(self):
         """

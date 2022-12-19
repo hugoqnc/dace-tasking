@@ -140,7 +140,7 @@ src.VC.VC.opendb
 *.exp
 
 # DaCe
-.dacecache/
+#.dacecache/
 out.sdfg
 *.out
 results.log

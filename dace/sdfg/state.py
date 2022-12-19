@@ -760,6 +760,9 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
         self.location = location if location is not None else {}
         self._default_lineinfo = None
 
+        # JZ
+        self._top_level_open = True
+
     @property
     def parent(self):
         """ Returns the parent SDFG of this state. """

@@ -1748,24 +1748,30 @@ class CPUCodeGen(TargetCodeGenerator):
             #            reduced_variables.append(outedge)
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
+        # JZ
         elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            map_header += "#pragma omp parallel\n"
-            map_header += "{\n"
-            map_header += "#pragma omp single nowait\n"
-            map_header += "{\n"
-        elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
-            if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.Start:
-                map_header += "#pragma omp parallel\n"
-                map_header += "{ // Tasking scope starts!\n"
-                map_header += "#pragma omp single nowait\n"
-                map_header += "{\n"
-            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
-                map_header += "#pragma omp task\n"
-                map_header += "{ // Task block starts!\n{\n"  # Two "{"" !
-            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
-                map_header += "{ // Tasking block content\n"
-            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End:
-                map_header += "{ // Tasking block going to end\n"
+            depend = ""
+            print(">>>> Depend:", node.in_connectors)
+            map_header += f"#pragma omp task {depend}\n"
+            map_header += "{ // Task block starts!\n"
+        # elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+        #     map_header += "#pragma omp parallel\n"
+        #     map_header += "{\n"
+        #     map_header += "#pragma omp single nowait\n"
+        #     map_header += "{\n"
+        # elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+        #     if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.Start:
+        #         map_header += "#pragma omp parallel\n"
+        #         map_header += "{ // Tasking scope starts!\n"
+        #         map_header += "#pragma omp single nowait\n"
+        #         map_header += "{\n"
+        #     if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
+        #         map_header += "#pragma omp task\n"
+        #         map_header += "{ // Task block starts!\n{\n"  # Two "{"" !
+        #     elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
+        #         map_header += "{ // Tasking block content\n"
+        #     elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End:
+        #         map_header += "{ // Tasking block going to end\n"
 
         # TODO: Explicit map unroller
         if node.map.unroll:
@@ -1792,9 +1798,9 @@ class CPUCodeGen(TargetCodeGenerator):
                 node,
             )
             # Note we only generate task in the most outer loop
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
-                result.write("#pragma omp task\n", sdfg, state_id, node)
-                result.write("{\n", sdfg, state_id, node)
+            # if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
+            #     result.write("#pragma omp task\n", sdfg, state_id, node)
+            #     result.write("{\n", sdfg, state_id, node)
 
         callsite_stream.write(inner_stream.getvalue())
 
@@ -1828,32 +1834,37 @@ class CPUCodeGen(TargetCodeGenerator):
             # for loop close
             result.write("}\n", sdfg, state_id, node)
             # omp task close: outermost loop
-            if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
-                result.write("}", sdfg, state_id, node)
+            # if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and i == 0:
+            #     result.write("}", sdfg, state_id, node)
         
+        # JZ
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            # omp single close
+            # omp task close
             result.write("}\n", sdfg, state_id, node)
-            result.write("#pragma omp taskwait\n", sdfg, state_id, node)
-            # omp parallel close
-            result.write("}\n", sdfg, state_id, node)
-        elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
-            if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
-                pass
-            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
-                # close previous mapentry {
-                result.write("} // Tasking block ends\n", sdfg, state_id, node)
-                # omp task close
-                result.write("} // Tasking block ends\n", sdfg, state_id, node)
-            elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start:
-                result.write("}\n", sdfg, state_id, node)
+        
+        # if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+        #     # omp single close
+        #     result.write("}\n", sdfg, state_id, node)
+        #     result.write("#pragma omp taskwait\n", sdfg, state_id, node)
+        #     # omp parallel close
+        #     result.write("}\n", sdfg, state_id, node)
+        # elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking_Block:
+        #     if node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Block:
+        #         pass
+        #     elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.End or node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.StartAndEnd:
+        #         # close previous mapentry {
+        #         result.write("} // Tasking block ends\n", sdfg, state_id, node)
+        #         # omp task close
+        #         result.write("} // Tasking block ends\n", sdfg, state_id, node)
+        #     elif node.map.omp_tasking_block == dtypes.OMPTaskingBlockType.Start:
+        #         result.write("}\n", sdfg, state_id, node)
 
-            if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.End:
-                # omp single close
-                result.write("}\n", sdfg, state_id, node)
-                result.write("#pragma omp taskwait\n", sdfg, state_id, node)
-                # omp parallel close
-                result.write("} // Task scope ends\n", sdfg, state_id, node)
+        #     if node.map.omp_tasking_scope == dtypes.OMPTaskingScopeType.End:
+        #         # omp single close
+        #         result.write("}\n", sdfg, state_id, node)
+        #         result.write("#pragma omp taskwait\n", sdfg, state_id, node)
+        #         # omp parallel close
+        #         result.write("} // Task scope ends\n", sdfg, state_id, node)
         
             
                 

@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     # Create a data-centric version of the program
     g = dace.program(multi_map).to_sdfg()
-    # g._regenerate_code = False
+    g._regenerate_code = False
 
     if args.opt:
         g = optimize_tasking(g)
