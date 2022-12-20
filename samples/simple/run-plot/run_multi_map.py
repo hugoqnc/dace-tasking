@@ -37,7 +37,7 @@ def plot():
         time = opt_data[:, 3].astype(np.float)
         ax.plot(threads, time, label = opt if opt!='' else 'none')
 
-    ax.set(xlabel='Number of threads', ylabel='Execution Time (s)',
+    ax.set(xlabel='Number of threads', ylabel='Execution Time (ms)',
         title=f'Execution time of "multi_map" for an array size of {data[0][2]} depending on the number of threads and optimizations')
     ax.grid()
     ax.legend()
