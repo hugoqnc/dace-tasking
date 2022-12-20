@@ -110,7 +110,7 @@ def create_datadescriptor(obj, no_custom_desc=False):
         return Scalar(dtypes.typeclass(obj))
     elif isinstance(obj, type) and issubclass(obj, numpy.number):
         return Scalar(dtypes.typeclass(obj))
-    elif isinstance(obj, (Number, numpy.number, numpy.bool, numpy.bool_)):
+    elif isinstance(obj, (Number, numpy.number, numpy.bool_)):
         return Scalar(dtypes.typeclass(type(obj)))
     elif obj is type(None):
         # NoneType is void *

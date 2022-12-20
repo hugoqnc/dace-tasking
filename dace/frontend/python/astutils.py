@@ -254,7 +254,7 @@ def unparse(node):
     if isinstance(node, sympy.Basic):
         return sympy.printing.pycode(node)
     # Support for numerical constants
-    if isinstance(node, (numbers.Number, numpy.bool, numpy.bool_)):
+    if isinstance(node, (numbers.Number, numpy.bool_)):
         return str(node)
     # Suport for string
     if isinstance(node, str):
@@ -354,7 +354,7 @@ def negate_expr(node):
     if isinstance(node, sympy.Basic):
         return sympy.Not(node)
     # Support for numerical constants
-    if isinstance(node, (numbers.Number, numpy.bool, numpy.bool_)):
+    if isinstance(node, (numbers.Number, numpy.bool_)):
         return str(not node)
     # Negation support for strings (most likely dace.Data.Scalar names)
     if isinstance(node, str):
