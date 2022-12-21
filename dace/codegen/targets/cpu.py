@@ -128,8 +128,10 @@ class CPUCodeGen(TargetCodeGenerator):
     ):
         entry_node = dfg_scope.source_nodes()[0]
         cpp.presynchronize_streams(sdfg, dfg_scope, state_id, entry_node, callsite_stream)
-
+        # JZ
+        print("Generate Scope", entry_node)
         self.generate_node(sdfg, dfg_scope, state_id, entry_node, function_stream, callsite_stream)
+        print("Generate Subgraph", entry_node)
         self._dispatcher.dispatch_subgraph(sdfg,
                                            dfg_scope,
                                            state_id,
@@ -138,6 +140,10 @@ class CPUCodeGen(TargetCodeGenerator):
                                            skip_entry_node=True)
 
     def generate_node(self, sdfg, dfg, state_id, node, function_stream, callsite_stream):
+        if isinstance(node, nodes.MapEntry):
+            print(type(node).__name__, node)
+        if isinstance(node, nodes.MapExit):
+            print(type(node).__name__, node)
         # Dynamically obtain node generator according to class name
         try:
             gen = getattr(self, "_generate_" + type(node).__name__)
@@ -970,6 +976,7 @@ class CPUCodeGen(TargetCodeGenerator):
                             write_expr = f"*({ptr_str} + {array_expr}) = {in_local_name};"
                         else:
                             desc_dtype = desc.dtype
+                            # JZ
                             expr = cpp.cpp_array_expr(sdfg, memlet, codegen=self._frame)
                             write_expr = codegen.make_ptr_assignment(in_local_name, conntype, expr, desc_dtype)
 
@@ -1748,11 +1755,29 @@ class CPUCodeGen(TargetCodeGenerator):
             #            reduced_variables.append(outedge)
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
-        # JZ
         elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            depend = ""
-            print(">>>> Depend:", node.in_connectors)
-            map_header += f"#pragma omp task {depend}\n"
+            # JZ
+            
+            in_conns = list(node.in_connectors.keys())
+            in_var_names = []
+            for in_conn in in_conns:
+                in_var_names.append(list(state_dfg.in_edges_by_connector(node, in_conn))[0].src.data)
+            node._in = in_var_names 
+            print(">>>> Depend Entry:", )
+            print(">>>>> in: ", node._in)
+            print(">>>>> out: ", node._out)
+
+            in_locators = ", ".join(node._in)
+            depend_in = ""
+            if in_locators != "":
+                depend_in = f" depend(in: {in_locators})"
+
+            out_locators = ", ".join(node._out)
+            depend_out = ""
+            if out_locators != "":
+                depend_out = f" depend(out: {out_locators})"
+
+            map_header += f"#pragma omp task{depend_in}{depend_out}\n"
             map_header += "{ // Task block starts!\n"
         # elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
         #     map_header += "#pragma omp parallel\n"
@@ -1839,6 +1864,7 @@ class CPUCodeGen(TargetCodeGenerator):
         
         # JZ
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+            print("<<<< Depend Exit")
             # omp task close
             result.write("}\n", sdfg, state_id, node)
         

@@ -351,7 +351,6 @@ class TargetDispatcher(object):
 
         self.defined_vars.enter_scope(state)
         disp = self.get_state_dispatcher(sdfg, state)
-        state._top_level_open = sdfg._top_level_open
         disp.generate_state(sdfg, state, function_stream, callsite_stream)
         self.defined_vars.exit_scope(state)
 
@@ -365,8 +364,6 @@ class TargetDispatcher(object):
                           skip_exit_node=False):
         """ Dispatches a code generator for a scope subgraph of an
             `SDFGState`. """
-        if isinstance(dfg, SDFGState):
-            sdfg._top_level_open = dfg._top_level_open
         start_nodes = list(v for v in dfg.nodes() if len(list(dfg.predecessors(v))) == 0)
 
         # Mark nodes to skip in order to be able to skip
@@ -386,14 +383,13 @@ class TargetDispatcher(object):
 
             if isinstance(v, nodes.MapEntry):
                 scope_subgraph = sdfg.node(state_id).scope_subgraph(v)
-
                 self.dispatch_scope(v.map.schedule, sdfg, scope_subgraph, state_id, function_stream, callsite_stream)
 
                 # Skip scope subgraph nodes
-                nodes_to_skip.update(scope_subgraph.nodes())
+                nodes_to_skip.update(scope_subgraph.nodes())    
             else:
                 self.dispatch_node(sdfg, dfg, state_id, v, function_stream, callsite_stream)
-
+                
     def get_node_dispatcher(self, sdfg, state, node):
         satisfied_dispatchers = [dispatcher for pred, dispatcher in self._node_dispatchers if pred(sdfg, state, node)]
         num_satisfied = len(satisfied_dispatchers)

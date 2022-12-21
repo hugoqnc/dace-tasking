@@ -129,6 +129,8 @@ class Node(object):
         connectors = self.out_connectors
         connectors[connector_name] = dtype
         self.out_connectors = connectors
+        # JZ
+        # print("++", self.out_connectors)
         return True
 
     def remove_in_connector(self, connector_name: str):
@@ -155,6 +157,8 @@ class Node(object):
             connectors = self.out_connectors
             del connectors[connector_name]
             self.out_connectors = connectors
+            # JZ
+            # print("--", self.out_connectors)
         return True
 
     def _next_connector_int(self) -> int:
@@ -666,6 +670,8 @@ class MapEntry(EntryNode):
         if map is None:
             raise ValueError("Map for MapEntry can not be None.")
         self._map = map
+        self._in = []
+        self._out = []
 
     @staticmethod
     def map_type():

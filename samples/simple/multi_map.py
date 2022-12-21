@@ -9,6 +9,7 @@ from typing import List
 from dace.sdfg.sdfg import SDFG
 from dace.sdfg.nodes import MapEntry, MapExit, AccessNode
 from dace.dtypes import ScheduleType, OMPTaskingBlockType, OMPTaskingScopeType
+from dace.transformation.auto.auto_optimize import auto_optimize
 
 # Define a symbol so that the vectors could have arbitrary sizes and compile the code once
 # (this step is not necessary for arrays with known sizes)
@@ -119,7 +120,8 @@ if __name__ == "__main__":
 
     # Create a data-centric version of the program
     g = dace.program(multi_map).to_sdfg()
-    g._regenerate_code = False
+    g._regenerate_code = True
+    g = auto_optimize(g, dace.dtypes.DeviceType.CPU)
 
     if args.opt:
         g = optimize_tasking(g)

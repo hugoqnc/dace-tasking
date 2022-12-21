@@ -854,6 +854,9 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
         super(SDFGState, self).remove_edge(edge)
         if edge.src_conn in edge.src.out_connectors:
             edge.src.remove_out_connector(edge.src_conn)
+            # JZ
+            # if (type(edge.src).__name__ == "MapExit"):
+            #     print("remove out connector:", edge.src)
         if edge.dst_conn in edge.dst.in_connectors:
             edge.dst.remove_in_connector(edge.dst_conn)
 

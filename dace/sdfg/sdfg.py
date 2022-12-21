@@ -1869,7 +1869,6 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
             self._temp_transients += 1
             name = '__tmp%d' % self._temp_transients
         self._temp_transients += 1
-
         return name
 
     def add_temp_transient(self,

@@ -41,6 +41,8 @@ def copy_expr(
 ):
     data_desc = sdfg.arrays[data_name]
     ptrname = ptr(data_name, data_desc, sdfg, dispatcher.frame)
+    # JZ
+    print(f"...... copy_expr 1 {ptrname}")
     if relative_offset:
         s = memlet.subset
         o = offset
@@ -91,6 +93,8 @@ def copy_expr(
             decouple_array_interfaces=decouple_array_interfaces)
     else:
         expr = ptr(data_name, data_desc, sdfg, dispatcher.frame)
+        # JZ
+        print(f"...... copy_expr 2 {expr}")
 
     add_offset = offset_cppstr != "0"
 
@@ -276,6 +280,8 @@ def emit_memlet_reference(dispatcher,
     offset_expr = '[' + offset + ']'
     is_scalar = not isinstance(conntype, dtypes.pointer)
     ptrname = ptr(memlet.data, desc, sdfg, dispatcher.frame)
+    # JZ
+    print(f"...... emit_memlet_reference 1 {ptrname}")
     ref = ''
 
     # Get defined type (pointer, stream etc.) and change the type definition
@@ -306,6 +312,8 @@ def emit_memlet_reference(dispatcher,
 
     else:
         datadef = ptr(memlet.data, desc, sdfg, dispatcher.frame)
+        # JZ
+        print(f"...... emit_memlet_reference 2 {datadef}")
 
     def make_const(expr: str) -> str:
         # check whether const has already been added before
@@ -578,6 +586,8 @@ def cpp_array_expr(sdfg,
                                     decouple_array_interfaces=decouple_array_interfaces)
         else:
             ptrname = ptr(memlet.data, desc, sdfg, codegen)
+            # JZ
+            print(f"...... cpp_array_expr 1 {ptrname}")
         return "%s[%s]" % (ptrname, offset_cppstr)
     else:
         return offset_cppstr
@@ -630,6 +640,8 @@ def cpp_ptr_expr(sdfg,
                               decouple_array_interfaces=decouple_array_interface)
     else:
         dname = ptr(memlet.data, desc, sdfg, codegen)
+        # JZ
+        print(f"...... cpp_ptr_expr 1 {dname}")
 
     if defined_type == DefinedType.Scalar:
         dname = '&' + dname
@@ -1126,6 +1138,8 @@ class DaCeKeywordRemover(ExtNodeTransformer):
                 desc = (self.sdfg.arrays[memlet.data] if memlet and memlet.data else None)
                 if memlet and memlet.data and (memlet.dynamic or isinstance(desc, data.Stream)):
                     ptrname = ptr(memlet.data, desc, self.sdfg, self.codegen._frame)
+                    # JZ
+                    print(f"...... visit_Assign 1 {ptrname}")
                     if wcr is not None:
                         newnode = ast.Name(
                             id=self.codegen.write_and_resolve_expr(self.sdfg,
@@ -1230,6 +1244,8 @@ class DaCeKeywordRemover(ExtNodeTransformer):
         memlet, nc, wcr, dtype = self.memlets[name]
         if node.id in self.sdfg.arrays:
             ptrname = ptr(node.id, self.sdfg.arrays[node.id], self.sdfg, self.codegen._frame)
+            # JZ
+            print(f"...... visit_Name 1 {ptrname}")
         else:
             ptrname = node.id
         try:

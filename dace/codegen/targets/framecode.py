@@ -348,41 +348,41 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
         # For different connected components, run them concurrently.
 
         components = dace.sdfg.concurrent_subgraphs(state)
-        #state._top_level_open
-        open = state._top_level_open and ("guard" not in state._label) and ("for" not in state._label) and ("while" not in state._label) and ("BoolOp" not in state._label)
+        from dace.dtypes import SCOPEDEFAULT_SCHEDULE, ScheduleType
+        open = SCOPEDEFAULT_SCHEDULE[None] == ScheduleType.CPU_Multicore_Tasking and \
+            state._top_level_open and \
+            ("guard" not in state._label) and ("for" not in state._label) and \
+            ("while" not in state._label) and ("BoolOp" not in state._label)
+        print(SCOPEDEFAULT_SCHEDULE[None] == ScheduleType.CPU_Multicore_Tasking, 
+            state._top_level_open)
         print(open, state._label)
 
+        # JZ 
+        if open:
+            callsite_stream.write("#pragma omp parallel \n{")
+            callsite_stream.write("#pragma omp single nowait \n{")
+            state._top_level_open = False
+            self._test="unique"
+
         if len(components) <= 1:
-            # JZ
-            if open:
-                callsite_stream.write("#pragma omp parallel \n{")
-                callsite_stream.write("#pragma omp single nowait \n{")
-                state._top_level_open = False
             self._dispatcher.dispatch_subgraph(sdfg, state, sid, global_stream, callsite_stream, skip_entry_node=False)
-            if open:
-                callsite_stream.write("} //End single")
-                callsite_stream.write("#pragma omp taskwait")
-                callsite_stream.write("} //End parallel")
         else:
             # if sdfg.openmp_sections:
             #     callsite_stream.write("#pragma omp parallel sections\n{")
             for c in components:
-                # JZ 
-                if open:
-                    callsite_stream.write("#pragma omp parallel \n{")
-                    callsite_stream.write("#pragma omp single nowait \n{")
-                    state._top_level_open = False
                 # if sdfg.openmp_sections:
                 #     callsite_stream.write("#pragma omp section\n{")
                 self._dispatcher.dispatch_subgraph(sdfg, c, sid, global_stream, callsite_stream, skip_entry_node=False)
-                if open:
-                    callsite_stream.write("} //End single")
-                    callsite_stream.write("#pragma omp taskwait")
-                    callsite_stream.write("} //End parallel")
                 # if sdfg.openmp_sections:
                 #     callsite_stream.write("} // End omp section")
             # if sdfg.openmp_sections:
             #     callsite_stream.write("} // End omp sections")
+        
+        # JZ
+        if open:
+            callsite_stream.write("} //End single")
+            callsite_stream.write("#pragma omp taskwait")
+            callsite_stream.write("} //End parallel")
 
         #####################
         # Write state footer
