@@ -961,7 +961,6 @@ class CPUCodeGen(TargetCodeGenerator):
                             if deftype == DefinedType.ArrayInterface:
                                 continue
                             array_expr = cpp.cpp_array_expr(sdfg, memlet, with_brackets=False, codegen=self._frame)
-                            # print("process_out_memlets", array_expr)
                             decouple_array_interfaces = Config.get_bool("compiler", "xilinx",
                                                                         "decouple_array_interfaces")
                             ptr_str = fpga.fpga_ptr(  # we are on fpga, since this is array interface
@@ -977,9 +976,7 @@ class CPUCodeGen(TargetCodeGenerator):
                             write_expr = f"*({ptr_str} + {array_expr}) = {in_local_name};"
                         else:
                             desc_dtype = desc.dtype
-                            # JZ
                             expr = cpp.cpp_array_expr(sdfg, memlet, codegen=self._frame)
-                            print("process_out_memlets 2", expr)
                             write_expr = codegen.make_ptr_assignment(in_local_name, conntype, expr, desc_dtype)
 
                     # Write out
@@ -1034,7 +1031,6 @@ class CPUCodeGen(TargetCodeGenerator):
                 offset = cpp.cpp_array_expr(sdfg, memlet, False, codegen=self._frame)
             else:
                 offset = cpp.cpp_array_expr(sdfg, memlet, False, codegen=self._frame)
-            # print("memlet_view_ctor", offset)
 
             # Compute address
             memlet_params.append(memlet_expr + " + " + offset)
