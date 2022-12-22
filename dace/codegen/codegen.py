@@ -200,6 +200,9 @@ def generate_code(sdfg, validate=True) -> List[CodeObject]:
     infer_types.infer_connector_types(sdfg)
     infer_types.set_default_schedule_and_storage_types(sdfg, default_schedule)
 
+    # JZ code: get in/out dependences
+    sdfg.get_in_out_dependences()
+
     frame = framecode.DaCeCodeGenerator(sdfg)
 
     # Instantiate CPU first (as it is used by the other code generators)

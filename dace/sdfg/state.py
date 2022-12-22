@@ -760,8 +760,6 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
         self.location = location if location is not None else {}
         self._default_lineinfo = None
 
-        # JZ
-        self._top_level_open = True
 
     @property
     def parent(self):
@@ -854,9 +852,6 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
         super(SDFGState, self).remove_edge(edge)
         if edge.src_conn in edge.src.out_connectors:
             edge.src.remove_out_connector(edge.src_conn)
-            # JZ
-            # if (type(edge.src).__name__ == "MapExit"):
-            #     print("remove out connector:", edge.src)
         if edge.dst_conn in edge.dst.in_connectors:
             edge.dst.remove_in_connector(edge.dst_conn)
 
@@ -1846,6 +1841,7 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
     def fill_scope_connectors(self):
         """ Creates new "IN_%d" and "OUT_%d" connectors on each scope entry
             and exit, depending on array names. """
+        entry_node = None
         for nid, node in enumerate(self.nodes()):
             ####################################################
             # Add connectors to scope entries
@@ -1910,6 +1906,62 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
                         continue
                     edge._dst_conn = "IN_" + str(conn_to_data[edge.data.data])
                     node.add_in_connector(edge.dst_conn)
+
+
+    # JZ code
+    def get_in_out_dependences(self):
+        """ save in/out dependences in MapEntry nodes with Multicore_Tasking schedule """
+        entry_node = None
+        for nid, node in enumerate(self.nodes()):
+            ####################################################
+            # Add connectors to scope entries
+            if isinstance(node, nd.MapEntry) and node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
+                # print("fill conn MapEntry", node, node.in_connectors, node.map.schedule)
+                entry_node = node
+                for in_conn in node.in_connectors.keys():
+                    for edge in self.in_edges_by_connector(node, in_conn):
+                        # if isinstance(edge.src, nd.MapEntry):
+                        #     node._in.append(str(edge.src_conn)[4:])
+                        # else:
+                        #     entry_node._out.append(edge.src.data)
+                        # print(f"!!!MapEntry data: {edge._data}, key: {edge._key}, src: {edge._src}, src_conn: {edge._src_conn}, dst: {edge._dst}, dst_conn: {edge._dst_conn}")
+                        data_str = str(edge._data)
+                        if "(" in data_str:
+                            var = data_str.split("(")[0]
+                            range = str(edge._data).split(")")[1].strip()
+                            if range[0] == "[" and range[-1] =="]" and ":" in range:
+                                locator = var + range
+                            else:
+                                locator = var
+                        else:
+                            locator = data_str
+                        node._in.append(locator)
+
+            ####################################################
+            # Same treatment for scope exits
+            if isinstance(node, nd.MapExit) and node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking and entry_node is not None:
+                # print("fill conn MapExit", node, node.out_connectors, node.map.schedule)
+                for out_conn in node.out_connectors.keys():
+                    for edge in self.out_edges_by_connector(node, out_conn):
+                        # if isinstance(edge.dst, nd.MapExit):
+                        #     print(edge.src, edge.src_conn, edge.dst, edge.dst_conn)
+                        #     BUG
+                        #     entry_node._out.append(str(edge.dst)[3:])
+                        # else:
+                        #     entry_node._out.append(edge.dst.data)
+                        if entry_node is not None:
+                            # print(f"!!!MapExit data: {edge._data}, key: {edge._key}, src: {edge._src}, src_conn: {edge._src_conn}, dst: {edge._dst}, dst_conn: {edge._dst_conn}")
+                            data_str = str(edge._data)
+                            if "(" in data_str:
+                                var = data_str.split("(")[0]
+                                range = str(edge._data).split(")")[1].strip()
+                                if range[0] == "[" and range[-1] =="]" and ":" in range:
+                                    locator = var + range
+                                else:
+                                    locator = var
+                            else:
+                                locator = data_str
+                            entry_node._out.append(locator)
 
 
 class StateSubgraphView(SubgraphView, StateGraphView):

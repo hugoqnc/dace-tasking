@@ -439,9 +439,6 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
         self._orig_name = name
         self._num = 0
 
-        # JZ
-        self._top_level_open = True
-
     @property
     def sdfg_id(self):
         """
@@ -2164,6 +2161,7 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
         :return: An SDFG (returns self if optimizer is in place)
         """
         # Fill in scope entry/exit connectors
+        # JZ
         self.fill_scope_connectors()
 
         optclass = _get_optimizer_class(optimizer)
@@ -2236,6 +2234,7 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
 
             try:
                 # Fill in scope entry/exit connectors
+                # JZ
                 sdfg.fill_scope_connectors()
 
                 # Generate code for the program by traversing the SDFG state by state
@@ -2343,6 +2342,12 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
             nodes) according to data on the memlets. """
         for state in self.nodes():
             state.fill_scope_connectors()
+    
+    # JZ code
+    def get_in_out_dependences(self):
+        """ save in/out dependences in MapEntry nodes with Multicore_Tasking schedule """
+        for state in self.nodes():
+            state.get_in_out_dependences()
 
     def predecessor_state_transitions(self, state):
         """ Yields paths (lists of edges) that the SDFG can pass through
@@ -2669,6 +2674,7 @@ class SDFG(OrderedDiGraph[SDFGState, InterstateEdge]):
         sdfg = copy.deepcopy(self)
 
         # Fill in scope entry/exit connectors
+        # JZ
         sdfg.fill_scope_connectors()
 
         # Generate code for the program by traversing the SDFG state by state

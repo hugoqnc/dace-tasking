@@ -692,15 +692,6 @@ def consolidate_edges(sdfg: SDFG, starting_scope=None) -> int:
                 if consolidated > 0:
                     propagate_exit = True
 
-                # JZ: save out_connectors also in MapEntry
-                if isinstance(scope.exit, nd.MapExit):
-                    out_conns = list(scope.exit.out_connectors.keys())
-                    out_var_names = []
-                    for out_conn in out_conns:
-                        out_var_names.append(list(state.out_edges_by_connector(scope.exit, out_conn))[0].dst.data)
-                    scope.entry._out = out_var_names 
-                    print(scope.entry, scope.entry._out)
-
                 # Repropagate memlets
                 propagate_memlets_scope(sdfg, state, scope, propagate_entry, propagate_exit)
 

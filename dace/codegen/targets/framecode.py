@@ -75,6 +75,9 @@ class DaCeCodeGenerator(object):
 
                 self._symbols_and_constants[nsdfg.sdfg_id] = result
 
+        # JZ code
+        self._top_level_open = True
+
     # Cached fields
     def symbols_and_constants(self, sdfg: SDFG):
         return self._symbols_and_constants[sdfg.sdfg_id]
@@ -327,7 +330,6 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
         callsite_stream.write('delete __state;\n}\n', sdfg)
 
     def generate_state(self, sdfg, state, global_stream, callsite_stream, generate_state_footer=True):
-
         sid = sdfg.node_id(state)
 
         # Emit internal transient array allocation
@@ -348,21 +350,21 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
         # For different connected components, run them concurrently.
 
         components = dace.sdfg.concurrent_subgraphs(state)
+
+        # JZ code
         from dace.dtypes import SCOPEDEFAULT_SCHEDULE, ScheduleType
         open = SCOPEDEFAULT_SCHEDULE[None] == ScheduleType.CPU_Multicore_Tasking and \
-            state._top_level_open and \
+            self._top_level_open and \
             ("guard" not in state._label) and ("for" not in state._label) and \
-            ("while" not in state._label) and ("BoolOp" not in state._label)
-        print(SCOPEDEFAULT_SCHEDULE[None] == ScheduleType.CPU_Multicore_Tasking, 
-            state._top_level_open)
-        print(open, state._label)
+            ("while" not in state._label) and ("BoolOp" not in state._label) and \
+            ("init" not in state._label)
+        # print(open, state._label)
 
-        # JZ 
+        # JZ code
         if open:
             callsite_stream.write("#pragma omp parallel \n{")
             callsite_stream.write("#pragma omp single nowait \n{")
-            state._top_level_open = False
-            self._test="unique"
+            self._top_level_open = False
 
         if len(components) <= 1:
             self._dispatcher.dispatch_subgraph(sdfg, state, sid, global_stream, callsite_stream, skip_entry_node=False)
@@ -378,11 +380,12 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
             # if sdfg.openmp_sections:
             #     callsite_stream.write("} // End omp sections")
         
-        # JZ
+        # JZ code
         if open:
             callsite_stream.write("} //End single")
             callsite_stream.write("#pragma omp taskwait")
             callsite_stream.write("} //End parallel")
+            self._top_level_open = True
 
         #####################
         # Write state footer
@@ -395,6 +398,7 @@ DACE_EXPORTED void __dace_exit_{sdfg.name}({sdfg.name}_t *__state)
             for instr in self._dispatcher.instrumentation.values():
                 if instr is not None:
                     instr.on_state_end(sdfg, state, callsite_stream, global_stream)
+
 
     def generate_states(self, sdfg, global_stream, callsite_stream):
         states_generated = set()

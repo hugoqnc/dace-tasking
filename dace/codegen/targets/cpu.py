@@ -129,21 +129,21 @@ class CPUCodeGen(TargetCodeGenerator):
         entry_node = dfg_scope.source_nodes()[0]
         cpp.presynchronize_streams(sdfg, dfg_scope, state_id, entry_node, callsite_stream)
         # JZ
-        print("Generate Scope", entry_node)
+        # print("Generate Scope", entry_node)
+        # code_storage = {"code":{}, "order":[]}
         self.generate_node(sdfg, dfg_scope, state_id, entry_node, function_stream, callsite_stream)
-        print("Generate Subgraph", entry_node)
+        # print("Generate Subgraph", entry_node)
         self._dispatcher.dispatch_subgraph(sdfg,
                                            dfg_scope,
                                            state_id,
                                            function_stream,
                                            callsite_stream,
-                                           skip_entry_node=True)
+                                           skip_entry_node=True,
+                                           )
+        # for node in code_storage["order"]:
+        #     callsite_stream.write(code_storage["code"][node])
 
     def generate_node(self, sdfg, dfg, state_id, node, function_stream, callsite_stream):
-        if isinstance(node, nodes.MapEntry):
-            print(type(node).__name__, node)
-        if isinstance(node, nodes.MapExit):
-            print(type(node).__name__, node)
         # Dynamically obtain node generator according to class name
         try:
             gen = getattr(self, "_generate_" + type(node).__name__)
@@ -961,6 +961,7 @@ class CPUCodeGen(TargetCodeGenerator):
                             if deftype == DefinedType.ArrayInterface:
                                 continue
                             array_expr = cpp.cpp_array_expr(sdfg, memlet, with_brackets=False, codegen=self._frame)
+                            # print("process_out_memlets", array_expr)
                             decouple_array_interfaces = Config.get_bool("compiler", "xilinx",
                                                                         "decouple_array_interfaces")
                             ptr_str = fpga.fpga_ptr(  # we are on fpga, since this is array interface
@@ -978,6 +979,7 @@ class CPUCodeGen(TargetCodeGenerator):
                             desc_dtype = desc.dtype
                             # JZ
                             expr = cpp.cpp_array_expr(sdfg, memlet, codegen=self._frame)
+                            print("process_out_memlets 2", expr)
                             write_expr = codegen.make_ptr_assignment(in_local_name, conntype, expr, desc_dtype)
 
                     # Write out
@@ -1032,6 +1034,7 @@ class CPUCodeGen(TargetCodeGenerator):
                 offset = cpp.cpp_array_expr(sdfg, memlet, False, codegen=self._frame)
             else:
                 offset = cpp.cpp_array_expr(sdfg, memlet, False, codegen=self._frame)
+            # print("memlet_view_ctor", offset)
 
             # Compute address
             memlet_params.append(memlet_expr + " + " + offset)
@@ -1756,16 +1759,10 @@ class CPUCodeGen(TargetCodeGenerator):
 
             map_header += " %s\n" % ", ".join(reduction_stmts)
         elif node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            # JZ
-            
-            in_conns = list(node.in_connectors.keys())
-            in_var_names = []
-            for in_conn in in_conns:
-                in_var_names.append(list(state_dfg.in_edges_by_connector(node, in_conn))[0].src.data)
-            node._in = in_var_names 
-            print(">>>> Depend Entry:", )
-            print(">>>>> in: ", node._in)
-            print(">>>>> out: ", node._out)
+            # JZ code
+            # print(">>>> Depend Entry:", )
+            # print(">>>>> in: ", node._in)
+            # print(">>>>> out: ", node._out)
 
             in_locators = ", ".join(node._in)
             depend_in = ""
@@ -1864,7 +1861,7 @@ class CPUCodeGen(TargetCodeGenerator):
         
         # JZ
         if node.map.schedule == dtypes.ScheduleType.CPU_Multicore_Tasking:
-            print("<<<< Depend Exit")
+            # print("<<<< Depend Exit")
             # omp task close
             result.write("}\n", sdfg, state_id, node)
         
