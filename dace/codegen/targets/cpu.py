@@ -1760,7 +1760,9 @@ class CPUCodeGen(TargetCodeGenerator):
             # print(">>>>> in: ", node._in)
             # print(">>>>> out: ", node._out)
 
-            in_locators = ", ".join(node._in)
+            in_out = set(node._in).union(set(node._out))
+            in_locators = ", ".join(in_out)
+            # in_locators = ", ".join(node._in)
             depend_in = ""
             if in_locators != "":
                 depend_in = f" depend(in: {in_locators})"
