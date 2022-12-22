@@ -1929,10 +1929,12 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
                         if "(" in data_str:
                             var = data_str.split("(")[0]
                             range = str(edge._data).split(")")[1].strip()
-                            if range[0] == "[" and range[-1] =="]" and ":" in range:
+                            if range[0] == "[" and range[-1] =="]" and ":" in range and "," not in range:
                                 locator = var + range
                             else:
                                 locator = var
+                        elif "[" in data_str and "," in data_str:
+                            locator = data_str.split("[")[0]
                         else:
                             locator = data_str
                         node._in.append(locator)
@@ -1955,10 +1957,12 @@ class SDFGState(OrderedMultiDiConnectorGraph[nd.Node, mm.Memlet], StateGraphView
                             if "(" in data_str:
                                 var = data_str.split("(")[0]
                                 range = str(edge._data).split(")")[1].strip()
-                                if range[0] == "[" and range[-1] =="]" and ":" in range:
+                                if range[0] == "[" and range[-1] =="]" and ":" in range and "," not in range:
                                     locator = var + range
                                 else:
                                     locator = var
+                            elif "[" in data_str and "," in data_str:
+                                locator = data_str.split("[")[0]
                             else:
                                 locator = data_str
                             entry_node._out.append(locator)
