@@ -4,13 +4,14 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-threads = [1, 2, 4, 8, 12, 16]
+threads = [1, 2, 3, 4, 5, 8, 12]
 optimizations = ["", "--opt", "--autoopt", "--opt --autoopt"]
-array_size = 100000000
+array_size = 100000
 iterations = 1
+suffix = "_16maps_1k"
 
 def run():
-    with open('results/multi_map.csv', 'w') as csvfile:
+    with open('results/multi_map'+suffix+'.csv', 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['optimizations', 'threads', 'array_size', 'exec_time'])
 
@@ -24,25 +25,29 @@ def run():
                 i += 1
 
 def plot():
-    with open('results/multi_map.csv', 'r') as csvfile:
+    with open('results/multi_map'+suffix+'.csv', 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader)
         data = np.array(list(reader))
         # print(data)
 
     fig, ax = plt.subplots()
+    all_threads = []
     for opt in optimizations:
         opt_data = data[data[:, 0] == opt]
-        threads = opt_data[:, 1].astype(np.int)
-        time = opt_data[:, 3].astype(np.float)
+        threads = opt_data[:, 1].astype(int)
+        all_threads = threads
+        time = opt_data[:, 3].astype(float)
         ax.plot(threads, time, label = opt if opt!='' else 'none')
 
     ax.set(xlabel='Number of threads', ylabel='Execution Time (ms)',
-        title=f'Execution time of "multi_map" for an array size of {data[0][2]} depending on the number of threads and optimizations')
+        title=f'Execution time of "multi_map" for an array size of {data[0][2]}\ndepending on the number of threads and optimizations\n(averaged on 10 executions on a 4-cores CPU)')
     ax.grid()
     ax.legend()
 
-    fig.savefig("results/multi_map.png")
+    ax.set_xticks(all_threads)
+    fig.tight_layout()
+    fig.savefig('results/multi_map'+suffix+'.png', dpi=400)
     plt.show()
 
 # Main
