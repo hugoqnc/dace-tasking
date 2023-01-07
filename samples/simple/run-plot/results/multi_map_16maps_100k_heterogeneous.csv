@@ -1,0 +1,3 @@
+optimizations,threads,array_size,exec_time
+,1,100000,4.375087000000111
+--opt,1,100000,2.8015485000003615

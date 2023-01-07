@@ -14,6 +14,7 @@ from dace.transformation.auto.auto_optimize import auto_optimize
 # Define a symbol so that the vectors could have arbitrary sizes and compile the code once
 # (this step is not necessary for arrays with known sizes)
 N = dace.symbol('N')
+divideArrayBy = 4 # Divides array and makes the first chunck longer than the others
 
 
 # Define the program
@@ -40,66 +41,113 @@ def multi_map(A: dace.float64[N], T: dace.int64):
     for _ in range(T):
         # This loop will become a parallel map
         for i in dace.map[1:N - 16]:
-            tmp1[i] = A[i - 1] - 1 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp1[i] = np.exp(np.sqrt(np.log((A[i - 1] - 1 * A[i] + A[i + 1])**3)))
+            else:
+                tmp1[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 15]:
-            tmp2[i] = A[i - 1] - 2 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp2[i] = np.exp(np.sqrt(np.log((A[i - 1] - 2 * A[i] + A[i + 1])**3)))
+            else:  
+                tmp2[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 14]:
-            tmp3[i] = A[i - 1] - 3 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp3[i] = np.exp(np.sqrt(np.log((A[i - 1] - 3 * A[i] + A[i + 1])**3)))
+            else:
+                tmp3[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 13]:
-            tmp4[i] = A[i - 1] - 4 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp4[i] = np.exp(np.sqrt(np.log((A[i - 1] - 4 * A[i] + A[i + 1])**3)))
+            else:
+                tmp4[i] = 0
 
         for i in dace.map[1:N - 12]:
-            tmp5[i] = A[i - 1] - 1 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp5[i] = np.exp(np.sqrt(np.log((A[i - 1] - 1 * A[i] + A[i + 1])**3)))
+            else:
+                tmp5[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 11]:
-            tmp6[i] = A[i - 1] - 2 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp6[i] = np.exp(np.sqrt(np.log((A[i - 1] - 2 * A[i] + A[i + 1])**3)))
+            else:
+                tmp6[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 10]:
-            tmp7[i] = A[i - 1] - 3 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp7[i] = np.exp(np.sqrt(np.log((A[i - 1] - 3 * A[i] + A[i + 1])**3)))
+            else:
+                tmp7[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 9]:
-            tmp8[i] = A[i - 1] - 4 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp8[i] = np.exp(np.sqrt(np.log((A[i - 1] - 4 * A[i] + A[i + 1])**3)))
+            else:
+                tmp8[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 8]:
-            tmp9[i] = A[i - 1] - 1 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp9[i] = np.exp(np.sqrt(np.log((A[i - 1] - 1 * A[i] + A[i + 1])**3)))
+            else:
+                tmp9[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 7]:
-            tmp10[i] = A[i - 1] - 2 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp10[i] = np.exp(np.sqrt(np.log((A[i - 1] - 2 * A[i] + A[i + 1])**3)))
+            else:
+                tmp10[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 6]:
-            tmp11[i] = A[i - 1] - 3 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp11[i] = np.exp(np.sqrt(np.log((A[i - 1] - 3 * A[i] + A[i + 1])**3)))
+            else:
+                tmp11[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 5]:
-            tmp12[i] = A[i - 1] - 4 * A[i] + A[i + 1]
-            
+            if i<N/divideArrayBy:
+                tmp12[i] = np.exp(np.sqrt(np.log((A[i - 1] - 4 * A[i] + A[i + 1])**3)))
+            else:
+                tmp12[i] = 0
+
         for i in dace.map[1:N - 4]:
-            tmp13[i] = A[i - 1] - 1 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp13[i] = np.exp(np.sqrt(np.log((A[i - 1] - 1 * A[i] + A[i + 1])**3)))
+            else:
+                tmp13[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 3]:
-            tmp14[i] = A[i - 1] - 2 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp14[i] = np.exp(np.sqrt(np.log((A[i - 1] - 2 * A[i] + A[i + 1])**3)))
+            else:
+                tmp14[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 2]:
-            tmp15[i] = A[i - 1] - 3 * A[i] + A[i + 1]
+            if i<N/divideArrayBy:
+                tmp15[i] = np.exp(np.sqrt(np.log((A[i - 1] - 3 * A[i] + A[i + 1])**3)))
+            else:
+                tmp15[i] = 0
 
         # This loop will become a parallel map
         for i in dace.map[1:N - 1]:
-            tmp16[i] = A[i - 1] - 4 * A[i] + A[i + 1]
-
+            if i<N/divideArrayBy:
+                tmp16[i] = np.exp(np.sqrt(np.log((A[i - 1] - 4 * A[i] + A[i + 1])**3)))
+            else:
+                tmp16[i] = 0
 
         for i in dace.map[1:N - 1]:
             A[i] = tmp1[i] + tmp2[i] + tmp3[i] + tmp4[i] + tmp5[i] + tmp6[i] + tmp7[i] + tmp8[i] + tmp9[i] + tmp10[i] + tmp11[i] + tmp12[i] + tmp13[i] + tmp14[i] + tmp15[i] + tmp16[i]

@@ -4,11 +4,20 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
+# PARAMETERS TO CHANGE _______________________________________________________
 threads = [1, 2, 3, 4, 5, 8, 12]
-optimizations = ["", "--opt", "--autoopt", "--opt --autoopt"]
 array_size = 100000
+heterogeneous = True
+suffix = "_16maps_100k"
+# ____________________________________________________________________________
+
 iterations = 1
-suffix = "_16maps_1k"
+optimizations = ["", "--opt", "--autoopt", "--opt --autoopt"]
+script = "multi_map.py"
+if heterogeneous:
+    suffix += "_heterogeneous"
+    script = "multi_map_heterogeneous.py"
+
 
 def run():
     with open('results/multi_map'+suffix+'.csv', 'w') as csvfile:
@@ -18,7 +27,7 @@ def run():
         i = 1
         for t in threads:
             for opt in optimizations:
-                res = os.popen(f'python ../multi_map.py {array_size} {iterations} {t} {opt}')
+                res = os.popen(f'python ../{script} {array_size} {iterations} {t} {opt}')
                 time = res.read().split('\n')[-2].split(' ')[1]
                 writer.writerow([opt, t, array_size, time])
                 print(f'{i}/{len(threads)*len(optimizations)} — optimizations: {opt}, threads: {t}, exec_time: {time}')

@@ -16,7 +16,7 @@ from dace.config import Config
 
 def timethis(sdfg, title, flop_count, f, *args, **kwargs):
     """ Runs a function multiple (`DACE_treps`) times, logs the running times 
-        to a file, and prints the median time (with FLOPs if given).
+        to a file, and prints the arithmetic mean time (with FLOPs if given).
 
         :param sdfg: The SDFG belonging to the measurement.
         :param title: A title of the measurement.
@@ -46,6 +46,7 @@ def timethis(sdfg, title, flop_count, f, *args, **kwargs):
                   'tqdm (`pip install tqdm`)\n\tTo disable this feature (and '
                   'this warning) set `profiling_status` to false in the dace '
                   'config (~/.dace.conf).')
+    times[0] = timer()
     for i in iterator:
         # Call function
         ret = f(*args, **kwargs)
@@ -71,9 +72,17 @@ def timethis(sdfg, title, flop_count, f, *args, **kwargs):
         GFLOPs = (flop_count / time_secs) * 1e-9
         print(title, GFLOPs, 'GFLOP/s       (', time_secs * 1000, 'ms)')
     else:
+        # Median
         time_secs = np.median(diffs)
-        print(title, time_secs * 1000, 'ms')
+        print('Median', time_secs * 1000, 'ms')
 
+        # Arithmetic mean
+        time_secs = np.mean(diffs)
+        print('Mean', time_secs * 1000, 'ms')
+
+        # Standard deviation
+        std = np.std(diffs)
+        print('Std', std * 1000, 'ms')
     return ret
 
 
