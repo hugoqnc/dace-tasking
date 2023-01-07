@@ -214,5 +214,5 @@ if __name__ == "__main__":
 
     # Time the result by enabling profiling
     with dace.config.set_temporary('profiling', value=True):
-        with dace.config.set_temporary('treps', value=10):
-            g(A=A, T=args.iterations, N=args.N)
+        with dace.config.set_temporary('treps', value=args.iterations):
+            g(A=A, T=1, N=args.N)

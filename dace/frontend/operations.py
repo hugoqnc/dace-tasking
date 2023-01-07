@@ -82,7 +82,7 @@ def timethis(sdfg, title, flop_count, f, *args, **kwargs):
 
         # Standard deviation
         std = np.std(diffs)
-        print('Std', std * 1000, 'ms')
+        print('StdDev', std * 1000, 'ms')
     return ret
 
 
