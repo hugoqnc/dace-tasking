@@ -8,10 +8,10 @@ import numpy as np
 
 # RUN PARAMETERS TO CHANGE __________________________________________________
 threads = [1, 2, 3, 4, 5, 8, 12]
-array_size = 100000
-iterations = 10
+array_size = 10000000
+iterations = 100
 heterogeneous = True
-suffix = "_16maps_100k"
+suffix = "_16maps_10M_2"
 # ____________________________________________________________________________
 
 # PLOT PARAMETERS TO CHANGE __________________________________________________
@@ -87,6 +87,14 @@ def plot():
     ax.grid(which='minor', linestyle=':', linewidth=0.2, color='gray')
 
     fig.suptitle(f'Execution time of "multi_maps" ({ "heterogeneous" if heterogeneous else "homogeneous" }) for an array size of {data[0][2]},\ndepending on the number of threads and optimizations\n[averaged on {iterations} executions on a 4-cores CPU, error bars for standard deviation]', x=0.08, horizontalalignment='left', fontsize=12)
+
+    ax.annotate('The points were shifted slightly on the x-axis only to be able to distinguish the error bars.\nMeasurements have been connected with dotted lines to improve readability.',
+        xy = (0.0, -0.14),
+        xycoords='axes fraction',
+        ha='left',
+        va="center",
+        fontsize=8,
+        color='gray')
 
     ax.set_xticks(all_threads)
     fig.tight_layout()
