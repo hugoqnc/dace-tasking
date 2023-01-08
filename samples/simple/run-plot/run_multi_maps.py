@@ -10,7 +10,7 @@ import numpy as np
 threads = [1, 2, 3, 4, 5, 8, 12]
 array_size = 10000000
 iterations = 100
-heterogeneous = True
+heterogeneous = False
 suffix = "_16maps_10M_2"
 # ____________________________________________________________________________
 
@@ -69,6 +69,7 @@ def plot():
             x=threads,
             y=time,
             linestyle='dotted',
+            dashes=(1, 3),
             linewidth=0.8,
             fmt=plot_markers[i],
             markersize=5,
